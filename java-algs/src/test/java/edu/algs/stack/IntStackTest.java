@@ -1,6 +1,5 @@
-package edu.algs;
+package edu.algs.stack;
 
-import edu.algs.stack.IntStack;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
