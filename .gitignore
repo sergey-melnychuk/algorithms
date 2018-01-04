@@ -1,5 +1,7 @@
 .idea/
 .gradle/
+build/
+out/
 gradle/
 gradlew
 gradlew.bat
@@ -7,3 +9,4 @@ gradlew.bat
 *.iml
 *.log
 *.tmp
+
