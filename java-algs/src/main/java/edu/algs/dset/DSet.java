@@ -27,6 +27,7 @@ public class DSet {
         return x;
     }
 
+    // Assign (s)ource group to the (t)arget group
     public void union(int s, int t) {
         int sg = find(s);
         int tg = find(t);
