@@ -1,6 +1,7 @@
 package edu.algs.graph;
 
 import edu.algs.dset.DSet;
+import edu.algs.pqueue.IntPQueue;
 
 import java.util.*;
 
@@ -152,7 +153,7 @@ public class Graph {
             dist[e.target] = e.weight;
         }
         BitSet seen = new BitSet(N);
-        Queue<Integer> queue = new LinkedList<>();
+        Queue<Integer> queue = new LinkedList<>(); //TODO change to IntQueue
         queue.offer(source);
         while (!queue.isEmpty()) {
             int node = queue.poll();
@@ -168,6 +169,31 @@ public class Graph {
                 }
             }
         }
+        return dist;
+    }
+
+    public long[] dijkstra(int s) {
+        long INF = Integer.MAX_VALUE;
+        long dist[] = new long[N];
+        for (int i=0; i<N; i++) if (i != s) dist[i] = INF;
+
+        IntPQueue pq = new IntPQueue(N);
+        for (int i=0; i<N; i++) pq.add(i, dist[i]);
+
+        while (!pq.isEmpty()) {
+            int u = pq.top();
+            for (Edge e : adj(u)) {
+                int v = e.target;
+                int w = e.weight;
+                long alt = dist[u] + w;
+                if (dist[v] > alt) {
+                    dist[v] = alt;
+                    pq.set(v, alt);
+                }
+            }
+        }
+
+        for (int i=0; i<N; i++) if (dist[i] == INF) dist[i] = -1;
         return dist;
     }
 

@@ -2,6 +2,9 @@ package edu.algs.graph;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
@@ -49,16 +52,30 @@ public class GraphTest {
                 new Edge(1, 2),
                 new Edge(0, 2)
         );
-        Graph g = Factory.edges(es, true, 0);
+        Graph g = Factory.edges(n, es, true);
         long expected[] = {0, 1, 1};
         assertArrayEquals(expected, g.bfs(0));
     }
 
+    /*
+    A----(3)----B
+    |           |
+    \-(1)-C-(1)-/
+    see: see https://stackoverflow.com/a/30409594
+     */
     @Test
-    void wrongShortestPathWithBFSonWeightedGraph() {
-        // see https://stackoverflow.com/a/30409594
-        Graph g = Factory.edges(Arrays.asList(new Edge(1, 1, 2)));
+    void weightedBfsThrows() {
+        Graph g = Factory.edges(2, Arrays.asList(new Edge(1, 1, 2)), false);
         Throwable t = assertThrows(UnsupportedOperationException.class, () -> g.bfs(0));
         assertEquals("Can't run BFS on weighted graph", t.getMessage());
+    }
+
+    @Test
+    void dijkstra3() {
+        String str = "4 4\n1 2 24\n1 4 20\n3 1 3\n4 3 12\n";
+        InputStream is = new ByteArrayInputStream(str.getBytes(Charset.defaultCharset()));
+        Graph g = Factory.stream(is, false, 1, false);
+        long expected[] = {0, 24, 3, 15};
+        assertArrayEquals(expected, g.dijkstra(0));
     }
 }
