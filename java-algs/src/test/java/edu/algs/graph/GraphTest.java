@@ -1,5 +1,6 @@
 package edu.algs.graph;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -25,23 +26,60 @@ public class GraphTest {
             {3, 2, 4},
             {3, 4, 5}
         };
+        Graph g = Factory.array(n, edges, false, 1);
 
         List<Edge> expected = Arrays.asList(
                 new Edge(0, 2, 3),
-                new Edge(2, 1, 4),
+                new Edge(1, 2, 4),
                 new Edge(2, 3, 5)
         );
 
-        Graph g = new Graph(n);
-        for (int i=0; i<edges.length; i++) {
-            int s = edges[i][0]-1;
-            int t = edges[i][1]-1;
-            int w = edges[i][2];
-            g.edge(s, t, w, false);
-        }
-
         List<Edge> mst = g.kruskal();
         assertEquals(expected, mst);
+    }
+
+    @Test
+    void prim4() {
+        final int n = 4;
+        int edges[][] = {
+            {1, 2, 5},
+            {1, 3, 3},
+            {4, 1, 6},
+            {2, 4, 7},
+            {3, 2, 4},
+            {3, 4, 5}
+        };
+        Graph g = Factory.array(n, edges, false, 1);
+
+        List<Edge> expected = Arrays.asList(
+                new Edge(0, 2, 3),
+                new Edge(1, 2, 4),
+                new Edge(2, 3, 5)
+        );
+
+        List<Edge> mst = g.prim(2);
+        mst.sort(Edge.ASC);
+        assertEquals(expected, mst);
+    }
+
+    @Test
+    @Disabled //FIXME
+    void prim4HR() {
+        String s = "4 5\n" +
+                "1 2 1\n" +
+                "3 2 150\n" +
+                "4 3 99\n" +
+                "1 4 100\n" +
+                "3 1 200\n";
+        Graph g = Factory.string(s, false, 1, false);
+
+        List<Edge> expected = Arrays.asList(
+                new Edge(0, 1, 1),
+                new Edge(2, 3, 99),
+                new Edge(0, 3, 100)
+        );
+
+        assertEquals(expected, g.prim(3));
     }
 
     @Test
@@ -77,5 +115,28 @@ public class GraphTest {
         Graph g = Factory.stream(is, false, 1, false);
         long expected[] = {0, 24, 3, 15};
         assertArrayEquals(expected, g.dijkstra(0));
+    }
+
+    private static final String G =
+            "5 6\n" +
+            "1 2 3\n" +
+            "1 3 4\n" +
+            "4 2 6\n" +
+            "5 2 2\n" +
+            "2 3 5\n" +
+            "3 5 7\n";
+
+    @Test
+    void mst() {
+        InputStream is = new ByteArrayInputStream(G.getBytes(Charset.defaultCharset()));
+        Graph g = Factory.stream(is, false, 1, false);
+        List<Edge> k = g.kruskal();
+        k.sort(Edge.ASC);
+        int n = g.size().nodes;
+        for (int i=0; i<n; i++) {
+            List<Edge> p = g.prim(i);
+            p.sort(Edge.ASC);
+            assertEquals(k, p, "mismatch for prim's starting node " + i);
+        }
     }
 }
