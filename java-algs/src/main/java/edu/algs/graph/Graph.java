@@ -2,8 +2,12 @@ package edu.algs.graph;
 
 import edu.algs.dset.DSet;
 import edu.algs.pqueue.IntPQueue;
+import edu.algs.queue.IntQueue;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.BitSet;
 
 public class Graph {
     private final int N;
@@ -20,8 +24,6 @@ public class Graph {
         }
     }
 
-
-
     public int[][] getMatrix() { return getMatrix(false); }
 
     public int[][] getMatrix(boolean directed) {
@@ -37,8 +39,6 @@ public class Graph {
         return result;
     }
 
-
-
     public void edge(Edge e) { edges.get(e.source).add(e); }
 
     public void edge(int u, int v) { edge(u, v, Edge.W); }
@@ -51,8 +51,6 @@ public class Graph {
             edges.get(v).add(new Edge(v, u, w));
         }
     }
-
-
 
     public List<Edge> adj(int u) { return adj(u, false, false); }
 
@@ -70,8 +68,6 @@ public class Graph {
         }
     }
 
-
-
     public List<Edge> getEdges() { return getEdges(false); }
 
     public List<Edge> getEdges(boolean sorted) {
@@ -85,8 +81,6 @@ public class Graph {
         return result;
     }
 
-
-
     public long weight() {
         long sum = 0L;
         for (int i=0; i<N; i++)
@@ -94,8 +88,6 @@ public class Graph {
                 sum += e.weight;
         return sum;
     }
-
-
 
     @Override
     public String toString() {
@@ -137,7 +129,12 @@ public class Graph {
     }
 
 
-
+    /**
+     * Breadth-First Search algorithm finds shortest paths' lengths from starting node in unweighted graph
+     *
+     * @param source starting node
+     * @return array of distances to all nodes from the starting node, D(s,i) = A[i]
+     */
     public long[] bfs(int source) {
         for (Edge e : getEdges()) {
             if (e.weight != 1) {
@@ -153,7 +150,7 @@ public class Graph {
             dist[e.target] = e.weight;
         }
         BitSet seen = new BitSet(N);
-        Queue<Integer> queue = new LinkedList<>(); //TODO change to IntQueue
+        IntQueue queue = new IntQueue(N);
         queue.offer(source);
         while (!queue.isEmpty()) {
             int node = queue.poll();
@@ -172,6 +169,13 @@ public class Graph {
         return dist;
     }
 
+    /**
+     * Dijkstra's algorithm finds shortest paths' lengths from starting node for weighted graph
+     * See: https://en.wikipedia.org/wiki/Dijkstra's_algorithm
+     *
+     * @param s starting node
+     * @return array of distances to all nodes from the starting node, D(s,i) = A[i]
+     */
     public long[] dijkstra(int s) {
         long INF = Integer.MAX_VALUE;
         long dist[] = new long[N];
@@ -198,7 +202,7 @@ public class Graph {
     }
 
     /**
-     * Floyd-Warshall algorithm to find shortest distance between all pairs of nodes in a weighted graph.
+     * Floyd-Warshall algorithm to find shortest distance between all pairs of nodes in a weighted graph
      * See: https://en.wikipedia.org/wiki/Floyd-Warshall_algorithm
      *
      * @return Matrix of minimal distance between pair of nodes in the graph, D(i,j) = M[i][j]
@@ -217,6 +221,12 @@ public class Graph {
         return dist;
     }
 
+    /**
+     * Kruskal's algorithm finds edges that form Minimum Spanning Tree of a graph.
+     * See: https://en.wikipedia.org/wiki/Kruskal's_algorithm
+     *
+     * @return
+     */
     public List<Edge> kruskal() {
         DSet dset = new DSet(N);
         List<Edge> all = getEdges(true);

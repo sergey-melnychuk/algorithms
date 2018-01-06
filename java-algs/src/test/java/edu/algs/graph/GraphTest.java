@@ -67,7 +67,7 @@ public class GraphTest {
     void weightedBfsThrows() {
         Graph g = Factory.edges(2, Arrays.asList(new Edge(1, 1, 2)), false);
         Throwable t = assertThrows(UnsupportedOperationException.class, () -> g.bfs(0));
-        assertEquals("Can't run BFS on weighted graph", t.getMessage());
+        assertEquals("Attempt to run BFS on weighted graph (leads to incorrect result)", t.getMessage());
     }
 
     @Test
