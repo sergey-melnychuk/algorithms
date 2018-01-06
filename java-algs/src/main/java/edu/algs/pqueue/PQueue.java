@@ -1,35 +1,42 @@
 package edu.algs.pqueue;
 
-public class IntPQueue {
+public class PQueue<T> {
     private final int N;
-    private final Entry items[];
+    private final Entry<T> items[];
 
     private int size = 0;
 
-    public IntPQueue(int n) {
+    public PQueue(int n) {
         this.N = n;
-        this.items = new Entry[N];
+        this.items = (Entry<T>[]) new Entry[N];
     }
 
-    public void add(int item, long p) {
+    public void add(T item, long p) {
         if (size == N) {
             throw new IllegalStateException("PQueue overflow");
         }
-        items[size] = Entry.of(item, p);
+        items[size] = Entry.<T>of(item, p);
         size += 1;
         rise(size-1);
     }
 
-    public int top() {
+    public T top() {
         if (size == 0) {
             throw new IllegalStateException("PQueue underflow");
         }
-        Entry e = items[0];
+        Entry<T> e = items[0];
         items[0] = items[size-1];
         items[size-1] = null;
         size -= 1;
         sink(0);
         return e.item;
+    }
+
+    public T peek() {
+        if (size == 0) {
+            throw new IllegalStateException("PQueue underflow");
+        }
+        return items[0].item;
     }
 
     public void set(int item, long p) {
@@ -66,7 +73,7 @@ public class IntPQueue {
         }
     }
 
-    int find(int item) { for (int i=0; i<size; i++) if (items[i].item == item) return i; return -1; }
+    int find(int item) { for (int i=0; i<size; i++) if (items[i].item.equals(item)) return i; return -1; }
     int parent(int i) { return (i >= size || i <= 0) ? -1 : (i+1)/2-1; }
     int lnode(int i) { int l = (i+1)*2-1; return (i < 0 || l >= size) ? -1 : l; }
     int rnode(int i) { int r = (i+1)*2;   return (i < 0 || r >= size) ? -1 : r; }
@@ -90,15 +97,15 @@ public class IntPQueue {
     }
 
     void swap(int i, int j) {
-        Entry ti = items[i];
+        Entry<T> ti = items[i];
         items[i] = items[j];
         items[j] = ti;
     }
 
-    private static class Entry {
-        final int item;
+    private static class Entry<T> {
+        final T item;
         long p;
-        private Entry(int item, long p) { this.item = item; this.p = p; }
-        static Entry of(int item, long p) { return new Entry(item, p); }
+        private Entry(T item, long p) { this.item = item; this.p = p; }
+        static <T> Entry<T> of(T item, long p) { return new Entry<T>(item, p); }
     }
 }

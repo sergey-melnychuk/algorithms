@@ -13,7 +13,7 @@ public class IntPQueueTest {
     @Test
     void ordering() {
         final int n = 100;
-        IntPQueue pq = new IntPQueue(n);
+        PQueue<Integer> pq = new PQueue<>(n);
         assertTrue(pq.isEmpty());
         for (int i=0; i<n; i++) {
             pq.add(i, n-1-i);
@@ -34,7 +34,7 @@ public class IntPQueueTest {
     @Test
     void bulkOrdering() {
         final int n = 10;
-        final IntPQueue pq = new IntPQueue(2*n);
+        final PQueue<Integer> pq = new PQueue<>(2*n);
         for (int i=0; i<n; i++) pq.add(i, 10*n+i);
         for (int i=0; i<n; i++) pq.add(10*n+i, i);
 
@@ -50,7 +50,7 @@ public class IntPQueueTest {
     @Test
     void setPriority() {
         final int n = 10;
-        final IntPQueue pq = new IntPQueue(2*n);
+        final PQueue<Integer> pq = new PQueue<>(2*n);
         for (int i=0; i<n; i++) pq.add(i, 100+i);
         for (int i=0; i<n; i++) pq.add(100+i, 200+i);
         for (int i=0; i<n; i++) pq.set(100+i, i);
