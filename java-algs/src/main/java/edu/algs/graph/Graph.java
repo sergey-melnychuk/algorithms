@@ -141,7 +141,7 @@ public class Graph {
     public long[] bfs(int source) {
         for (Edge e : getEdges()) {
             if (e.weight != 1) {
-                throw new UnsupportedOperationException("Can't run BFS on weighted graph");
+                throw new UnsupportedOperationException("Attempt to run BFS on weighted graph (leads to incorrect result)");
             }
         }
         long dist[] = new long[N];
@@ -197,32 +197,23 @@ public class Graph {
         return dist;
     }
 
+    /**
+     * Floyd-Warshall algorithm to find shortest distance between all pairs of nodes in a weighted graph.
+     * See: https://en.wikipedia.org/wiki/Floyd-Warshall_algorithm
+     *
+     * @return Matrix of minimal distance between pair of nodes in the graph, D(i,j) = M[i][j]
+     */
     public long[][] floyd() {
-        final long INF = Long.MAX_VALUE/2 -1;
+        final long INF = Long.MAX_VALUE/2; // avoid overflow when comparing dist to sum of dists
         long dist[][] = new long [N][N];
-
-        for (int i=0; i<N; i++) {
-            for (int j=0; j<N; j++) {
-                dist[i][j] = INF;
-            }
-            dist[i][i] = 0;
-        }
-
-        for (int i=0; i<N; i++) {
-            for (Edge e : adj(i)) {
-                dist[i][e.target] = e.weight;
-            }
-        }
-
-        for (int k=0; k<N; k++) {
-            for (int i=0; i<N; i++) {
-                for (int j=0; j<N; j++) {
-                    if (dist[i][j] > dist[i][k] + dist[k][j]) {
+        for (int i=0; i<N; i++) for (int j=0; j<N; j++) dist[i][j] = (i == j) ? 0 : INF;
+        for (int i=0; i<N; i++) for (Edge e : adj(i)) dist[i][e.target] = e.weight;
+        for (int k=0; k<N; k++)
+            for (int i=0; i<N; i++)
+                for (int j=0; j<N; j++)
+                    if (dist[i][j] > dist[i][k] + dist[k][j]) // to avoid overflow here, INF is Long.MAX_VALUE/2
                         dist[i][j] = dist[i][k] + dist[k][j];
-                    }
-                }
-            }
-        }
+        for (int i=0; i<N; i++) for (int j=0; j<N; j++) if (dist[i][j] == INF) dist[i][j] = -1;
         return dist;
     }
 
