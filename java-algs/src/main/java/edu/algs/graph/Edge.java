@@ -24,6 +24,11 @@ class Edge {
         return new Edge(target, source, weight);
     }
 
+    public Edge normal() {
+        if (source <= target) return this;
+        else return reverse();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
