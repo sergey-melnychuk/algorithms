@@ -69,26 +69,32 @@ public class Factory {
             Graph.Size size = parseHeader(reader.readLine());
             List<Edge> edges = new ArrayList<>(size.edges);
             if (minlen) {
-                int unique[][] = new int[size.edges][3];
+                int unique[][] = new int[size.nodes][size.nodes];
                 for (int i = 0; i < size.edges; i++) {
                     Edge e = parseEdge(reader.readLine(), offset);
-                    int u = e.source - offset;
-                    int v = e.target - offset;
+                    int u = e.source;
+                    int v = e.target;
                     int w = e.weight;
+                    int oldw = unique[u][v];
+                    int neww = Math.min(w, Math.max(0, oldw));
                     if (directed) {
-                        unique[u][v] = Math.min(unique[u][v], w);
+                        unique[u][v] = neww;
                     } else {
-                        unique[u][v] = Math.min(Math.min(unique[u][v], unique[v][u]), w);
-                        unique[v][u] = unique[u][v];
+                        oldw = Math.min(
+                                Math.max(0, unique[u][v]),
+                                Math.max(0, unique[v][u]));
+                        neww = (oldw == 0) ? w : Math.min(w, oldw);
+                        unique[u][v] = neww;
+                        unique[v][u] = neww;
                     }
                 }
-                for (int i = 0; i < size.edges; i++) {
-                    int u = unique[i][0];
-                    int v = unique[i][1];
-                    int w = unique[i][2];
-                    edges.add(new Edge(u, v, w));
+                for (int i=0; i < size.nodes; i++) {
+                    for (int j=0; j < size.nodes; j++) {
+                        int w = unique[i][j];
+                        if (w > 0) edges.add(new Edge(i, j, w));
+                    }
                 }
-                return edges(size.nodes, edges, directed);
+                return edges(size.nodes, edges);
             } else {
                 for (int i = 0; i < size.edges; i++) {
                     Edge edge = parseEdge(reader.readLine(), offset);

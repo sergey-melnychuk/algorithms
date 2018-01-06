@@ -70,4 +70,103 @@ public class FactoryTest {
         Graph g = Factory.stream(is);
         assertEquals(s, g.toString());
     }
+
+    @Test
+    void streamUndir() {
+        String s =
+                "4 6\n" +
+                "0 1 5\n" +
+                "0 2 3\n" +
+                "1 3 7\n" +
+                "2 1 4\n" +
+                "2 3 5\n" +
+                "3 0 6\n";
+        InputStream is = new ByteArrayInputStream(s.getBytes(Charset.defaultCharset()));
+        Graph g = Factory.stream(is, false);
+        String expected =
+                "4 12\n" +
+                "0 1 5\n" +
+                "0 2 3\n" +
+                "0 3 6\n" +
+                "1 3 7\n" +
+                "1 0 5\n" +
+                "1 2 4\n" +
+                "2 1 4\n" +
+                "2 3 5\n" +
+                "2 0 3\n" +
+                "3 0 6\n" +
+                "3 1 7\n" +
+                "3 2 5\n";
+        assertEquals(expected, g.toString());
+    }
+
+    @Test
+    void streamUndirOffset() {
+        String s =
+                "4 6\n" +
+                "10 11 5\n" +
+                "10 12 3\n" +
+                "11 13 7\n" +
+                "12 11 4\n" +
+                "12 13 5\n" +
+                "13 10 6\n";
+        InputStream is = new ByteArrayInputStream(s.getBytes(Charset.defaultCharset()));
+        Graph g = Factory.stream(is, false, 10);
+        String expected =
+                "4 12\n" +
+                "0 1 5\n" +
+                "0 2 3\n" +
+                "0 3 6\n" +
+                "1 3 7\n" +
+                "1 0 5\n" +
+                "1 2 4\n" +
+                "2 1 4\n" +
+                "2 3 5\n" +
+                "2 0 3\n" +
+                "3 0 6\n" +
+                "3 1 7\n" +
+                "3 2 5\n";
+        assertEquals(expected, g.toString());
+    }
+
+    @Test
+    void streamUndirOffsetMinlen() {
+        String s =
+                "4 18\n" +
+                "10 11 5\n" +
+                "10 11 50\n" +
+                "10 11 500\n" +
+                "10 12 3\n" +
+                "10 12 30\n" +
+                "10 12 300\n" +
+                "11 13 7\n" +
+                "11 13 70\n" +
+                "11 13 700\n" +
+                "12 11 4\n" +
+                "12 11 40\n" +
+                "12 11 400\n" +
+                "12 13 5\n" +
+                "12 13 50\n" +
+                "12 13 500\n" +
+                "13 10 6\n" +
+                "13 10 60\n" +
+                "13 10 600\n";
+        InputStream is = new ByteArrayInputStream(s.getBytes(Charset.defaultCharset()));
+        Graph g = Factory.stream(is, false, 10, true);
+        String expected =
+                "4 12\n" +
+                "0 1 5\n" +
+                "0 2 3\n" +
+                "0 3 6\n" +
+                "1 0 5\n" +
+                "1 2 4\n" +
+                "1 3 7\n" +
+                "2 0 3\n" +
+                "2 1 4\n" +
+                "2 3 5\n" +
+                "3 0 6\n" +
+                "3 1 7\n" +
+                "3 2 5\n";
+        assertEquals(expected, g.toString());
+    }
 }
