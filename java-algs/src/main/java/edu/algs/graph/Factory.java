@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -34,17 +36,27 @@ public class Factory {
         return graph;
     }
 
-    public static Graph array(int n, int a[][]) { return array(n, a, 0); }
+    public static Graph array(int n, int es[][]) { return array(n, es, true); }
 
-    public static Graph array(int n, int a[][], int offset) {
-        final Graph g = of(n);
-        for (int i=0; i<a.length; i++) {
-            int u = a[i][0] - offset;
-            int v = a[i][1] - offset;
-            int w = a[i][2];
-            g.edge(u, v, w);
+    public static Graph array(int n, int es[][], boolean directed) { return array(n, es, directed, 0); }
+
+    public static Graph array(int n, int es[][], boolean directed, int offset) {
+        int k = directed ? 1 : 2;
+        List<Edge> edges = new ArrayList<>(es.length * k);
+        for (int i=0; i<es.length; i++) {
+            Edge e = fetchEdge(es[i], offset);
+            edges.add(e);
+            if (!directed) edges.add(e.reverse());
         }
-        return g;
+        return edges(n, edges);
+    }
+
+    private static Edge fetchEdge(int a[], int offset) {
+        if (a.length > 2) {
+            return new Edge(a[0]-1, a[1]-1, a[2]);
+        } else {
+            return new Edge(a[0]-1, a[1]-1);
+        }
     }
 
     public static Graph edges(int n, List<Edge> edges) { return edges(n, edges, true); }
@@ -58,6 +70,11 @@ public class Factory {
         return graph;
     }
 
+    public static Graph string(String str, boolean directed, int offset, boolean minlen) {
+        InputStream is = new ByteArrayInputStream(str.getBytes(Charset.defaultCharset()));
+        return stream(is, directed, offset, minlen);
+    }
+
     public static Graph stream(InputStream is) { return stream(is, true, 0, false); }
 
     public static Graph stream(InputStream is, boolean directed) { return stream(is, directed, 0, false); }
@@ -65,7 +82,12 @@ public class Factory {
     public static Graph stream(InputStream is, boolean directed, int offset) { return stream(is, directed, offset, false); }
 
     public static Graph stream(InputStream is, boolean directed, int offset, boolean minlen) {
-        try(final BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        return reader(reader, directed, offset, minlen);
+    }
+
+    public static Graph reader(BufferedReader reader, boolean directed, int offset, boolean minlen) {
+        try {
             Graph.Size size = parseHeader(reader.readLine());
             List<Edge> edges = new ArrayList<>(size.edges);
             if (minlen) {
