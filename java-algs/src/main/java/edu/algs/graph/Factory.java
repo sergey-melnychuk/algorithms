@@ -47,14 +47,10 @@ public class Factory {
         return g;
     }
 
-    public static Graph edges(List<Edge> edges) { return edges(edges, true, 0); }
+    public static Graph edges(int n, List<Edge> edges) { return edges(n, edges, true); }
 
-    public static Graph edges(List<Edge> edges, boolean directed, int offset) {
-        int n = 0;
-        for (Edge e : edges) {
-            n = Math.max(n, Math.max(e.source, e.target));
-        }
-        final Graph graph = new Graph(n + offset + 1);
+    public static Graph edges(int n, List<Edge> edges, boolean directed) {
+        final Graph graph = new Graph(n);
         edges.forEach(graph::edge);
         if (!directed) {
             edges.stream().map(Edge::reverse).forEach(graph::edge);
@@ -66,19 +62,25 @@ public class Factory {
 
     public static Graph stream(InputStream is, boolean directed) { return stream(is, directed, 0, false); }
 
-    public static Graph stream(InputStream is, boolean directed, int offset, boolean dedup) {
+    public static Graph stream(InputStream is, boolean directed, int offset) { return stream(is, directed, offset, false); }
+
+    public static Graph stream(InputStream is, boolean directed, int offset, boolean minlen) {
         try(final BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             Graph.Size size = parseHeader(reader.readLine());
             List<Edge> edges = new ArrayList<>(size.edges);
-            if (dedup) {
+            if (minlen) {
                 int unique[][] = new int[size.edges][3];
                 for (int i = 0; i < size.edges; i++) {
-                    int[] edge = parseEdge(reader.readLine());
-                    int u = edge[0] - offset;
-                    int v = edge[1] - offset;
-                    int w = 1;
-                    unique[u][v] = w;
-                    if (edge.length > 2) w = edge[2];
+                    Edge e = parseEdge(reader.readLine(), offset);
+                    int u = e.source - offset;
+                    int v = e.target - offset;
+                    int w = e.weight;
+                    if (directed) {
+                        unique[u][v] = Math.min(unique[u][v], w);
+                    } else {
+                        unique[u][v] = Math.min(Math.min(unique[u][v], unique[v][u]), w);
+                        unique[v][u] = unique[u][v];
+                    }
                 }
                 for (int i = 0; i < size.edges; i++) {
                     int u = unique[i][0];
@@ -86,20 +88,13 @@ public class Factory {
                     int w = unique[i][2];
                     edges.add(new Edge(u, v, w));
                 }
-                return edges(edges, directed, offset);
+                return edges(size.nodes, edges, directed);
             } else {
                 for (int i = 0; i < size.edges; i++) {
-                    int[] edge = parseEdge(reader.readLine());
-                    int u = edge[0] - offset;
-                    int v = edge[1] - offset;
-                    if (edge.length > 2) {
-                        int w = edge[2];
-                        edges.add(new Edge(u, v, w));
-                    } else {
-                        edges.add(new Edge(u, v));
-                    }
+                    Edge edge = parseEdge(reader.readLine(), offset);
+                    edges.add(edge);
                 }
-                return edges(edges, directed, offset);
+                return edges(size.nodes, edges, directed);
             }
         } catch (IOException e) {
             throw new IllegalStateException("Failed to parse graph", e);
@@ -113,15 +108,15 @@ public class Factory {
         return new Graph.Size(n, m);
     }
 
-    private static int[] parseEdge(String line) {
+    private static Edge parseEdge(String line, int offset) {
         StringTokenizer st = new StringTokenizer(line);
-        int u = Integer.parseInt(st.nextToken());
-        int v = Integer.parseInt(st.nextToken());
+        int u = Integer.parseInt(st.nextToken()) - offset;
+        int v = Integer.parseInt(st.nextToken()) - offset;
         if (st.hasMoreTokens()) {
             int w = Integer.parseInt(st.nextToken());
-            return new int[] {u, v, w};
+            return new Edge(u, v, w);
         } else {
-            return new int[] {u, v};
+            return new Edge(u, v);
         }
     }
 }

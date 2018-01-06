@@ -50,6 +50,7 @@ public class FactoryTest {
 
     @Test
     void edges() {
+        int n = 4;
         List<Edge> expected = Arrays.asList(
                 new Edge(0, 2, 3),
                 new Edge(2, 1, 4),
@@ -58,7 +59,7 @@ public class FactoryTest {
                 new Edge(3, 0, 6),
                 new Edge(1, 3, 7)
         );
-        Graph g = Factory.edges(expected);
+        Graph g = Factory.edges(n, expected, true);
         assertEquals(expected, g.getEdges(true));
     }
 
