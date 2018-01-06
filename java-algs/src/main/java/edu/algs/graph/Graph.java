@@ -1,7 +1,7 @@
 package edu.algs.graph;
 
 import edu.algs.dset.DSet;
-import edu.algs.pqueue.IntPQueue;
+import edu.algs.pqueue.PQueue;
 import edu.algs.queue.IntQueue;
 
 import java.util.List;
@@ -53,6 +53,7 @@ public class Graph {
     }
 
     public List<Edge> adj(int u) { return adj(u, false, false); }
+    public List<Edge> sadj(int u) { return adj(u, true, false); }
 
     public List<Edge> adj(int u, boolean sorted, boolean reverse) {
         if (!sorted) {
@@ -181,7 +182,7 @@ public class Graph {
         long dist[] = new long[N];
         for (int i=0; i<N; i++) if (i != s) dist[i] = INF;
 
-        IntPQueue pq = new IntPQueue(N);
+        PQueue<Integer> pq = new PQueue<>(N);
         for (int i=0; i<N; i++) pq.add(i, dist[i]);
 
         while (!pq.isEmpty()) {
@@ -240,4 +241,32 @@ public class Graph {
         }
         return used;
     }
+
+    /**
+     * Prim's Algorithm finds MST of weighted undirected graph
+     * See: https://en.wikipedia.org/wiki/Prim's_algorithm
+     *
+     * @param s starting node (default is 0)
+     * @return list of edges selected for MST
+     */
+    public List<Edge> prim(int s) {
+        final int M = size().edges;
+        PQueue<Edge> pq = new PQueue<>(M);
+        for (int i=0; i<N; i++) for (Edge e : sadj(i)) pq.add(e, e.weight);
+        BitSet seen = new BitSet(N);
+        seen.set(pq.peek().source);
+        List<Edge> tree = new ArrayList<>(N-1);
+        while (!pq.isEmpty()) {
+            Edge e = pq.top();
+            int u = e.source;
+            int v = e.target;
+            if (seen.get(u) && !seen.get(v)) {
+                tree.add(e.normal());
+                seen.set(v);
+            }
+        }
+        tree.sort(Edge.ASC);
+        return tree;
+    }
+    public List<Edge> prim() { return prim(0); }
 }
