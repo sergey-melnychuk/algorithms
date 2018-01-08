@@ -53,9 +53,9 @@ public class Factory {
 
     private static Edge fetchEdge(int a[], int offset) {
         if (a.length > 2) {
-            return new Edge(a[0]-1, a[1]-1, a[2]);
+            return new Edge(a[0]-offset, a[1]-offset, a[2]);
         } else {
-            return new Edge(a[0]-1, a[1]-1);
+            return new Edge(a[0]-offset, a[1]-offset);
         }
     }
 
@@ -87,25 +87,30 @@ public class Factory {
     }
 
     public static Graph reader(BufferedReader reader, boolean directed, int offset, boolean minlen) {
+        return reader(reader, directed, offset, minlen, 0);
+    }
+
+    public static Graph reader(BufferedReader reader, boolean directed, int offset, boolean minlen, int empty) {
         try {
             Graph.Size size = parseHeader(reader.readLine());
             List<Edge> edges = new ArrayList<>(size.edges);
             if (minlen) {
                 int unique[][] = new int[size.nodes][size.nodes];
+                if (empty != 0) for (int i=0; i<size.nodes; i++) for (int j=0; j<size.nodes; j++) unique[i][j] = empty;
                 for (int i = 0; i < size.edges; i++) {
                     Edge e = parseEdge(reader.readLine(), offset);
                     int u = e.source;
                     int v = e.target;
                     int w = e.weight;
                     int oldw = unique[u][v];
-                    int neww = Math.min(w, Math.max(0, oldw));
+                    int neww = Math.min(w, Math.max(empty, oldw));
                     if (directed) {
                         unique[u][v] = neww;
                     } else {
                         oldw = Math.min(
-                                Math.max(0, unique[u][v]),
-                                Math.max(0, unique[v][u]));
-                        neww = (oldw == 0) ? w : Math.min(w, oldw);
+                                Math.max(empty, unique[u][v]),
+                                Math.max(empty, unique[v][u]));
+                        neww = (oldw == empty) ? w : Math.min(w, oldw);
                         unique[u][v] = neww;
                         unique[v][u] = neww;
                     }
@@ -113,7 +118,7 @@ public class Factory {
                 for (int i=0; i < size.nodes; i++) {
                     for (int j=0; j < size.nodes; j++) {
                         int w = unique[i][j];
-                        if (w > 0) edges.add(new Edge(i, j, w));
+                        if (w != empty) edges.add(new Edge(i, j, w));
                     }
                 }
                 return edges(size.nodes, edges);
