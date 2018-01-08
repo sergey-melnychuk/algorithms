@@ -252,9 +252,9 @@ public class Graph {
     public List<Edge> prim(int s) {
         final int M = size().edges;
         PQueue<Edge> pq = new PQueue<>(M);
-        for (int i=0; i<N; i++) for (Edge e : sadj(i)) pq.add(e, e.weight);
+        for (Edge e : adj(s)) pq.add(e, e.weight);
         BitSet seen = new BitSet(N);
-        seen.set(pq.peek().source);
+        seen.set(s);
         List<Edge> tree = new ArrayList<>(N-1);
         while (!pq.isEmpty()) {
             Edge e = pq.top();
@@ -263,6 +263,9 @@ public class Graph {
             if (seen.get(u) && !seen.get(v)) {
                 tree.add(e.normal());
                 seen.set(v);
+                for (Edge p : adj(v)) {
+                    pq.add(p, p.weight);
+                }
             }
         }
         tree.sort(Edge.ASC);

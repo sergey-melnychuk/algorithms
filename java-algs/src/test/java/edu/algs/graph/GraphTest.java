@@ -1,6 +1,5 @@
 package edu.algs.graph;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -63,8 +62,14 @@ public class GraphTest {
     }
 
     @Test
-    @Disabled //FIXME
     void prim4HR() {
+        /*
+          -----------------100*-----------------
+         |                                      |
+        (0)----1*---(1)----150----(2)----99*---(3)
+         |                         |
+          -----------200------------
+         */
         String s = "4 5\n" +
                 "1 2 1\n" +
                 "3 2 150\n" +
