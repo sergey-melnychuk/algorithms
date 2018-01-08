@@ -1,5 +1,6 @@
 package edu.algs.pqueue;
 
+@SuppressWarnings("unchecked")
 public class PQueue<T> {
     private final int N;
     private final Entry<T> items[];
