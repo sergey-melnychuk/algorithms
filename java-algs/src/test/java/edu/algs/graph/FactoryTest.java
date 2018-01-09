@@ -67,7 +67,7 @@ public class FactoryTest {
     void stream() {
         String s = "4 6\n0 1 5\n0 2 3\n1 3 7\n2 1 4\n2 3 5\n3 0 6\n";
         InputStream is = new ByteArrayInputStream(s.getBytes(Charset.defaultCharset()));
-        Graph g = Factory.stream(is);
+        Graph g = Factory.stream(is, true);
         assertEquals(s, g.toString());
     }
 

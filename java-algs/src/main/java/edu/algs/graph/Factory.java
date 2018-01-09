@@ -12,6 +12,10 @@ import java.util.StringTokenizer;
 
 public class Factory {
 
+    private static final boolean DIR = false;
+    private static final boolean MIN = false;
+    private static final int OFF = 0;
+
     public static Graph of(final int n) {
         return new Graph(n);
     }
@@ -36,10 +40,8 @@ public class Factory {
         return graph;
     }
 
-    public static Graph array(int n, int es[][]) { return array(n, es, true); }
-
-    public static Graph array(int n, int es[][], boolean directed) { return array(n, es, directed, 0); }
-
+    public static Graph array(int n, int es[][]) { return array(n, es, DIR); }
+    public static Graph array(int n, int es[][], boolean directed) { return array(n, es, directed, OFF); }
     public static Graph array(int n, int es[][], boolean directed, int offset) {
         int k = directed ? 1 : 2;
         List<Edge> edges = new ArrayList<>(es.length * k);
@@ -51,16 +53,7 @@ public class Factory {
         return edges(n, edges);
     }
 
-    private static Edge fetchEdge(int a[], int offset) {
-        if (a.length > 2) {
-            return new Edge(a[0]-offset, a[1]-offset, a[2]);
-        } else {
-            return new Edge(a[0]-offset, a[1]-offset);
-        }
-    }
-
-    public static Graph edges(int n, List<Edge> edges) { return edges(n, edges, true); }
-
+    public static Graph edges(int n, List<Edge> edges) { return edges(n, edges, DIR); }
     public static Graph edges(int n, List<Edge> edges, boolean directed) {
         final Graph graph = new Graph(n);
         edges.forEach(graph::edge);
@@ -70,22 +63,25 @@ public class Factory {
         return graph;
     }
 
+    public static Graph string(String str) { return string(str, DIR); }
+    public static Graph string(String str, boolean directed) { return string(str, directed, OFF, MIN); }
+    public static Graph string(String str, boolean directed, int offset) { return string(str, directed, offset, MIN); }
     public static Graph string(String str, boolean directed, int offset, boolean minlen) {
         InputStream is = new ByteArrayInputStream(str.getBytes(Charset.defaultCharset()));
         return stream(is, directed, offset, minlen);
     }
 
-    public static Graph stream(InputStream is) { return stream(is, true, 0, false); }
-
-    public static Graph stream(InputStream is, boolean directed) { return stream(is, directed, 0, false); }
-
-    public static Graph stream(InputStream is, boolean directed, int offset) { return stream(is, directed, offset, false); }
-
+    public static Graph stream(InputStream is) { return stream(is, DIR, OFF, MIN); }
+    public static Graph stream(InputStream is, boolean directed) { return stream(is, directed, OFF, MIN); }
+    public static Graph stream(InputStream is, boolean directed, int offset) { return stream(is, directed, offset, MIN); }
     public static Graph stream(InputStream is, boolean directed, int offset, boolean minlen) {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         return reader(reader, directed, offset, minlen);
     }
 
+    public static Graph reader(BufferedReader reader) { return reader(reader, DIR, OFF, MIN); }
+    public static Graph reader(BufferedReader reader, boolean directed) { return reader(reader, directed, OFF, MIN); }
+    public static Graph reader(BufferedReader reader, boolean directed, int offset) {return reader(reader, directed, offset, MIN); }
     public static Graph reader(BufferedReader reader, boolean directed, int offset, boolean minlen) {
         return reader(reader, directed, offset, minlen, 0);
     }
@@ -116,7 +112,8 @@ public class Factory {
                     }
                 }
                 for (int i=0; i < size.nodes; i++) {
-                    for (int j=0; j < size.nodes; j++) {
+                    int n = (directed ? size.nodes : i);
+                    for (int j=0; j < n; j++) {
                         int w = unique[i][j];
                         if (w != empty) edges.add(new Edge(i, j, w));
                     }
@@ -133,6 +130,15 @@ public class Factory {
             throw new IllegalStateException("Failed to parse graph", e);
         }
     }
+
+    private static Edge fetchEdge(int a[], int offset) {
+        if (a.length > 2) {
+            return new Edge(a[0]-offset, a[1]-offset, a[2]);
+        } else {
+            return new Edge(a[0]-offset, a[1]-offset);
+        }
+    }
+
 
     private static Graph.Size parseHeader(String line) {
         StringTokenizer st = new StringTokenizer(line);
