@@ -3,11 +3,13 @@ package edu.algs.graph;
 import edu.algs.dset.DSet;
 import edu.algs.pqueue.PQueue;
 import edu.algs.queue.IntQueue;
+import edu.algs.stack.IntStack;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.BitSet;
+import java.util.function.Consumer;
 
 public class Graph {
     private final int N;
@@ -129,38 +131,27 @@ public class Graph {
         }
     }
 
-
-    /**
-     * Breadth-First Search algorithm finds shortest paths' lengths from starting node in unweighted graph
-     *
-     * @param source starting node
-     * @return array of distances to all nodes from the starting node, D(s,i) = A[i]
-     */
-    public long[] bfs(int source) {
-        for (Edge e : getEdges()) {
-            if (e.weight != 1) {
-                throw new UnsupportedOperationException("Attempt to run BFS on weighted graph (leads to incorrect result)");
-            }
-        }
-        long dist[] = new long[N];
+    // Number of hops (links) from `start` node to `i-th` node
+    public int[] hops(int start) {
+        int dist[] = new int[N];
         for (int i=0; i<N; i++) {
             dist[i] = -1;
         }
-        dist[source] = 0;
-        for (Edge e : adj(source)) {
-            dist[e.target] = e.weight;
+        dist[start] = 0;
+        for (Edge e : adj(start)) {
+            dist[e.target] = 1;
         }
         BitSet seen = new BitSet(N);
         IntQueue queue = new IntQueue(N);
-        queue.offer(source);
+        queue.offer(start);
         while (!queue.isEmpty()) {
             int node = queue.poll();
-            long cost = dist[node];
+            int cost = dist[node];
             seen.set(node);
             for (Edge e : adj(node)) {
-                long d = dist[e.target];
-                if (d < 0 || d > cost + e.weight) {
-                    dist[e.target] = cost + e.weight;
+                int d = dist[e.target];
+                if (d < 0 || d > cost + 1) {
+                    dist[e.target] = cost + 1;
                 }
                 if (!seen.get(e.target)) {
                     queue.offer(e.target);
@@ -168,6 +159,85 @@ public class Graph {
             }
         }
         return dist;
+    }
+
+    // Size of subtree with root int `i-th` node, where `root` is the tree's node (A[root]=N)
+    public int[] reach(int root) {
+        int size[] = new int[N];
+        int prev[] = new int[N]; // trace of chaing of edges from source to current node
+        for (int i=0; i<N; i++) { size[i]=1; prev[i]=i; }
+        BitSet seen = new BitSet(N);
+        IntStack stack = new IntStack(N);
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            int n = stack.peek();
+            seen.set(n);
+            for (Edge e : adj(n)) {
+                if (!seen.get(e.target)) {
+                    stack.push(e.target);
+                    prev[e.target] = n;
+                    continue;
+                }
+            }
+            stack.pop(); // current node is still `n`
+            size[prev[n]] += size[n];
+        }
+        return size;
+    }
+
+    /**
+     * Depth-First Search traversal
+     *
+     * @param start
+     * @param node node consumer
+     * @param edge edge consumer
+     * @return
+     */
+    public void dfs(int start, Consumer<Integer> node, Consumer<Edge> edge) {
+        Edge from[] = new Edge[N]; // trace of chains of edges from source to current node
+        BitSet seen = new BitSet(N);
+        IntStack stack = new IntStack(N);
+        stack.push(start);
+        outer:
+        while (!stack.isEmpty()) {
+            int n = stack.peek();
+            seen.set(n);
+            for (Edge e : adj(n)) {
+                if (!seen.get(e.target)) {
+                    stack.push(e.target);
+                    from[e.target] = e;
+                    continue outer;
+                }
+            }
+            stack.pop(); // current node is still `n`
+            if (node != null) node.accept(n);
+            if (edge != null && from[n] != null) edge.accept(from[n]);
+        }
+    }
+
+    /**
+     * Breadth-First Search traversal
+     *
+     * @param start starting node
+     * @param node node consumer
+     * @param edge edge consumer
+     * @return array of distances to all nodes from the starting node, D(s,i) = A[i]
+     */
+    public void bfs(int start, Consumer<Integer> node, Consumer<Edge> edge) {
+        BitSet seen = new BitSet(N);
+        IntQueue queue = new IntQueue(N);
+        queue.offer(start);
+        while(!queue.isEmpty()) {
+            int n = queue.poll();
+            if (node != null) node.accept(n);
+            seen.set(n);
+            for (Edge e : adj(n)) {
+                if (!seen.get(e.target)) {
+                    if (edge != null) edge.accept(e);
+                    queue.offer(e.target);
+                }
+            }
+        }
     }
 
     /**
