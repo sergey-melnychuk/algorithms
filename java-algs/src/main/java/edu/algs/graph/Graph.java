@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.BitSet;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public class Graph {
@@ -169,6 +170,7 @@ public class Graph {
         BitSet seen = new BitSet(N);
         IntStack stack = new IntStack(N);
         stack.push(root);
+        outer:
         while (!stack.isEmpty()) {
             int n = stack.peek();
             seen.set(n);
@@ -176,13 +178,26 @@ public class Graph {
                 if (!seen.get(e.target)) {
                     stack.push(e.target);
                     prev[e.target] = n;
-                    continue;
+                    continue outer;
                 }
             }
             stack.pop(); // current node is still `n`
             size[prev[n]] += size[n];
         }
         return size;
+    }
+
+    // Sum min paths between for all u...v where u!=v
+    public long sumpaths() {
+        int root = 0;
+        final int tsize[] = reach(root);
+        // using atomic long just to keep reference final, to be able to reach it inside lambda, no concurrency expected
+        final AtomicLong sum = new AtomicLong(0L);
+        dfs(root, null, e -> {
+            int n = tsize[e.target];
+            sum.addAndGet(e.weight * n * (N-n));
+        });
+        return sum.get();
     }
 
     /**

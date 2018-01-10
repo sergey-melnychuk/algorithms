@@ -242,7 +242,7 @@ public class GraphTest {
 
     @Test
     void mst() {
-        final String G =
+        final String str =
                 "5 6\n" +
                 "1 2 3\n" +
                 "1 3 4\n" +
@@ -250,8 +250,7 @@ public class GraphTest {
                 "5 2 2\n" +
                 "2 3 5\n" +
                 "3 5 7\n";
-        InputStream is = new ByteArrayInputStream(G.getBytes(Charset.defaultCharset()));
-        Graph g = Factory.stream(is, false, 1, false);
+        Graph g = Factory.string(str, false, 1, false);
         List<Edge> k = g.kruskal();
         k.sort(Edge.ASC);
         int n = g.size().nodes;
@@ -261,4 +260,59 @@ public class GraphTest {
             assertEquals(k, p, "mismatch for prim's starting node " + i);
         }
     }
+
+    @Test
+    void sumpaths5() {
+        String str = "5 4\n" +
+                "1 2 8\n" +
+                "2 3 2\n" +
+                "2 4 4\n" +
+                "4 5 1\n";
+        Graph g = Factory.string(str, false, 1);
+        assertEquals(68, g.sumpaths());
+    }
+
+    @Test
+    void sumpaths19() {
+        String str = "19 36\n" +
+                "1 9 131072\n" +
+                "1 13 8192\n" +
+                "1 14 1024\n" +
+                "2 4 128\n" +
+                "2 10 2048\n" +
+                "3 4 16\n" +
+                "3 19 4\n" +
+                "4 2 128\n" +
+                "4 3 16\n" +
+                "4 9 1\n" +
+                "5 17 512\n" +
+                "5 18 16384\n" +
+                "6 7 256\n" +
+                "6 14 8\n" +
+                "7 6 256\n" +
+                "8 9 32768\n" +
+                "9 1 131072\n" +
+                "9 4 1\n" +
+                "9 8 32768\n" +
+                "10 2 2048\n" +
+                "11 12 2\n" +
+                "11 18 64\n" +
+                "12 11 2\n" +
+                "13 1 8192\n" +
+                "14 1 1024\n" +
+                "14 6 8\n" +
+                "15 18 4096\n" +
+                "15 19 32\n" +
+                "16 18 2097152\n" +
+                "17 5 512\n" +
+                "18 5 16384\n" +
+                "18 11 64\n" +
+                "18 15 4096\n" +
+                "18 16 2097152\n" +
+                "19 3 4\n" +
+                "19 15 32";
+        Graph g = Factory.string(str, false, 1);
+        assertEquals(48648840, g.sumpaths());
+    }
+
 }
