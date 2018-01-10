@@ -1,5 +1,6 @@
 package edu.algs.graph;
 
+import edu.algs.bits.TwoPowNSum;
 import edu.algs.dset.DSet;
 import edu.algs.pqueue.PQueue;
 import edu.algs.queue.IntQueue;
@@ -187,17 +188,18 @@ public class Graph {
         return size;
     }
 
-    // Sum min paths between for all u...v where u!=v
-    public long sumpaths() {
+    // Return binary string of sum of min paths between for all u...v where u!=v
+    public String binsumpaths() {
+        TwoPowNSum tpns = new TwoPowNSum();
         int root = 0;
         final int tsize[] = reach(root);
-        // using atomic long just to keep reference final, to be able to reach it inside lambda, no concurrency expected
-        final AtomicLong sum = new AtomicLong(0L);
         dfs(root, null, e -> {
-            int n = tsize[e.target];
-            sum.addAndGet(e.weight * n * (N-n));
+            long n = tsize[e.target];
+            long k = n * (N-n);
+            int w = e.weight;
+            tpns.add2pownk(w, k);
         });
-        return sum.get();
+        return tpns.toString();
     }
 
     /**
