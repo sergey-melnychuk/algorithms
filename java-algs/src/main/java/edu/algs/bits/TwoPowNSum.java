@@ -11,11 +11,11 @@ public class TwoPowNSum {
         bs.set(n);
     }
 
-    public void add2pownk(int n, int k) {
+    public void add2pownk(int n, long k) {
         bits(k, b -> add2pown(n + b));
     }
 
-    static void bits(int k, Consumer<Integer> bit) {
+    static void bits(long k, Consumer<Integer> bit) {
         int n = 0;
         while (k>0) {
             if ((k & 1)>0) bit.accept(n);

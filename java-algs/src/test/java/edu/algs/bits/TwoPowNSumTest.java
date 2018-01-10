@@ -66,4 +66,37 @@ class TwoPowNSumTest {
         tpns.add2pownk(3, 4);
         assertEquals(Integer.toBinaryString(68), tpns.toString()    );
     }
+
+    @Test
+    void carry() {
+        TwoPowNSum tpns = new TwoPowNSum();
+        for (int i=0; i<10; i++) tpns.add2pown(i);
+        assertEquals( "1111111111", tpns.toString());
+        tpns.add2pown(0);
+        assertEquals("10000000000", tpns.toString());
+    }
+
+    @Test
+    void sumk() {
+        int k = 19;
+        int n = 27;
+        TwoPowNSum tpns = new TwoPowNSum();
+        tpns.add2pownk(n, k);
+        assertEquals(Integer.toBinaryString((1<<n)*k), tpns.toString());
+    }
+
+    @Test
+    void sumk128() {
+        int n = 128;
+        int k = 9;
+        TwoPowNSum s = new TwoPowNSum();
+        s.add2pownk(n, k);
+        assertEquals(Integer.toBinaryString(k) + zeros(n), s.toString());
+    }
+
+    private String zeros(int n) {
+        StringBuilder sb = new StringBuilder();
+        for (int i=0; i<n; i++) sb.append('0');
+        return sb.toString();
+    }
 }
