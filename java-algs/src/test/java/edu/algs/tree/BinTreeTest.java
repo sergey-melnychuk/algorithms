@@ -47,7 +47,7 @@ class BinTreeTest {
 
     @Test
     void depth3() {
-        BinTree<Integer> tree = mkTree(4,2,6,1,3,4,7); // ends up as balanced tree
+        BinTree<Integer> tree = mkTree(4,2,6,1,3,5,7); // ends up as balanced tree
         assertEquals(3, tree.depth());
     }
 
@@ -93,6 +93,16 @@ class BinTreeTest {
         List<Integer> expected = Arrays.asList(1,2,3,4,5,6,7);
         List<Integer> actual = new ArrayList<>();
         tree.postorder(actual::add);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void reverse() {
+        BinTree<Integer> tree = mkTree(4,2,6,1,3,5,7); // ends up as balanced tree
+        List<Integer> expected = Arrays.asList(7,6,5,4,3,2,1);
+        tree.reverse();
+        List<Integer> actual = new ArrayList<>();
+        tree.inorder(actual::add);
         assertEquals(expected, actual);
     }
 

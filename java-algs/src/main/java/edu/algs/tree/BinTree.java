@@ -62,7 +62,7 @@ public class BinTree<T extends Comparable<T>> {
 
     public void inorder(Consumer<T> handler) { inorder(root, handler); }
 
-    void inorder(Node<T> from, Consumer<T> handler) {
+    private void inorder(Node<T> from, Consumer<T> handler) {
         if (from == null) return;
         if (from.left != null) inorder(from.left, handler);
         handler.accept(from.val);
@@ -71,7 +71,7 @@ public class BinTree<T extends Comparable<T>> {
 
     public void preorder(Consumer<T> handler) { preorder(root, handler); }
 
-    void preorder(Node<T> from, Consumer<T> handler) {
+    private void preorder(Node<T> from, Consumer<T> handler) {
         if (from == null) return;
         handler.accept(from.val);
         if (from.left != null) preorder(from.left, handler);
@@ -80,14 +80,27 @@ public class BinTree<T extends Comparable<T>> {
 
     public void postorder(Consumer<T> handler) { postorder(root, handler); }
 
-    void postorder(Node<T> from, Consumer<T> handler) {
+    private void postorder(Node<T> from, Consumer<T> handler) {
         if (from == null) return;
         if (from.left != null) postorder(from.left, handler);
         if (from.right != null) postorder(from.right, handler);
         handler.accept(from.val);
     }
 
-    boolean less(T lhs, T rhs) { return lhs.compareTo(rhs) < 0; }
+    public void reverse() {
+        root = reverse(root);
+    }
+
+    private Node<T> reverse(Node<T> node) {
+        if (node == null) return node;
+        Node<T> l = reverse(node.right);
+        Node<T> r = reverse(node.left);
+        node.right = r;
+        node.left = l;
+        return node;
+    }
+
+    private boolean less(T lhs, T rhs) { return lhs.compareTo(rhs) < 0; }
 
     static class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
         private final Node<T> parent;
