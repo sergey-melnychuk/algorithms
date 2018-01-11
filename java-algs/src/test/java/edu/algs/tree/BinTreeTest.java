@@ -40,9 +40,15 @@ class BinTreeTest {
     }
 
     @Test
-    void depth() {
-        BinTree<Integer> tree = mkTree(1,2,3,4,5,6,7);
+    void depth7() {
+        BinTree<Integer> tree = mkTree(1,2,3,4,5,6,7); // ends up as linked list
         assertEquals(7, tree.depth());
+    }
+
+    @Test
+    void depth3() {
+        BinTree<Integer> tree = mkTree(4,2,6,1,3,4,7); // ends up as balanced tree
+        assertEquals(3, tree.depth());
     }
 
     @Test
@@ -73,7 +79,7 @@ class BinTreeTest {
     @Test
     @Disabled //FIXME requires re-balancing implementation
     void preorder() {
-        BinTree<Integer> tree = mkTree(1,2,3,4,5,6,7);
+        BinTree<Integer> tree = mkTree(true,1,2,3,4,5,6,7);
         List<Integer> expected = Arrays.asList(4,2,6,1,3,5,7);
         List<Integer> actual = new ArrayList<>();
         tree.preorder(actual::add);
@@ -83,15 +89,17 @@ class BinTreeTest {
     @Test
     @Disabled //FIXME requires re-balancing implementation
     void postorder() {
-        BinTree<Integer> tree = mkTree(1,2,3,4,5,6,7);
+        BinTree<Integer> tree = mkTree(true,1,2,3,4,5,6,7);
         List<Integer> expected = Arrays.asList(1,2,3,4,5,6,7);
         List<Integer> actual = new ArrayList<>();
         tree.postorder(actual::add);
         assertEquals(expected, actual);
     }
 
-    private BinTree<Integer> mkTree(int ...items) {
-        BinTree<Integer> tree = BinTree.empty();
+    private BinTree<Integer> mkTree(int ...items) { return mkTree(false, items); }
+
+    private BinTree<Integer> mkTree(boolean balanced, int ...items) {
+        BinTree<Integer> tree = BinTree.empty(balanced);
         for (int i=0; i<items.length; i++) tree.insert(items[i]);
         return tree;
     }
