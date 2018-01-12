@@ -16,7 +16,7 @@ public class BinTree<T extends Comparable<T>> {
         Node<T> at = root;
         while (at != null) {
             if (at.val.equals(val)) return true;
-            else at = less(val, at.val) ? at.left : at.right;
+            else at = less(val, at.val) ? at.lo : at.hi;
         }
         return false;
     }
@@ -27,104 +27,147 @@ public class BinTree<T extends Comparable<T>> {
 
         Node<T> at = root;  // parent of to be inserted node
         Node<T> to;         // the link where node will be inserted
-        while ( (to = (less(val, at.val) ? at.left : at.right)) != null ) {
+        while ( (to = (less(val, at.val) ? at.lo : at.hi)) != null ) {
             if (to.val.equals(val)) return;
             at = to;
         }
 
         Node<T> node = Node.value(at, val);
-        if (less(val, at.val)) at.left = node; else at.right = node;
+        put(node);
+        stats(node);
 
-        Node<T> n = node;
-        while (!n.isRoot()) {
-            n.parent.size += 1;
-            n.parent.dep = 1 + Math.max(
-                    (n.parent.left == null ? 0 : n.parent.left.dep),
-                    (n.parent.right == null ? 0 : n.parent.right.dep));
-            n = n.parent;
-        }
-
-        if (balanced) rebalance(node);
+        balance(node);
     }
 
-    void update(Node<T> node, Node<T> branch) {
-        if (node == null) root = branch;
-        else if (less(branch.val, node.val)) node.left = branch; else node.right = branch;
+    private void put(Node<T> n) { put(n.parent, n); }
+    private void put(Node<T> p, Node<T> n) {
+        if (p == null) root = n;
+        else if (less(n.val, p.val)) p.lo = n; else p.hi = n;
+    }
+
+    private void stats(Node<T> from) { stats(from, root); }
+    private void stats(Node<T> from, Node<T> to) {
+        if (from == null) return;
+        Node<T> n = from;
+        while (n != to) {
+            n.parent.size += 1;
+            n.parent.dep = 1 + Math.max(
+                    (n.parent.lo == null ? 0 : n.parent.lo.dep),
+                    (n.parent.hi == null ? 0 : n.parent.hi.dep));
+            n = n.parent;
+        }
+    }
+
+    /*                     C
+           A      ->      / \
+         /  \            A  cr
+        /    \          / \
+       B      C        B   cl
+      / \    / \      / \
+    bl  bh cl  ch   bl  bh
+     */
+    private Node<T> movehi(Node<T> at) {
+        Node<T> to = at.hi;
+        Node<T> p = at.parent;
+        at.hi = to.lo;
+        to.lo = at;
+        put(p, to);
+        at.parent = to;
+        to.parent = p;
+        at.touch();
+        stats(at);
+        return to;
+    }
+
+    /*                     B
+           A      ->      / \
+         /  \           bl   A
+        /    \              / \
+       B      C           bh   C
+      / \    / \              / \
+    bl  bh cl  ch           cl  ch
+     */
+    private Node<T> movelo(Node<T> at) {
+        Node<T> to = at.lo;
+        Node<T> p = at.parent;
+        at.lo = to.hi;
+        to.hi = at;
+        put(p, to);
+        at.parent = to;
+        to.parent = p;
+        at.touch();
+        stats(at);
+        return to;
     }
 
     // Detect if re-balancing required for a given subtree and perform the rotation
-    void rebalance(Node<T> n) {
-        Node<T> p = n.parent;   if (p == null) return;
-        Node<T> pp = p.parent;  if (pp == null) return;
-        Node<T> r = pp.parent;
-
-        int pld = (p.left == null) ? 0 : p.left.dep;
-        int prd = (p.right == null) ? 0 : p.right.dep;
-
-        int ppld = (pp.left == null) ? 0 : pp.left.dep;
-        int pprd = (pp.right == null) ? 0 : pp.right.dep;
-
-        if (ppld == 2 && pprd == 0) {
-            if (pld > prd) {
-                /*
-                        LL rotation:
-                        |          |
-                   pp-> C    =>    B
-                       /          / \
-                  p-> B          A  C
-                     /
-                n-> A
-                 */
-                p.left = n;     p.right = pp;    p.parent = r;
-                n.left = null;  n.right = null;  n.parent = p;
-                pp.left = null; pp.right = null; pp.parent = p;
-                update(r, p);
-            } else {
-                /*
-                        LR rotation:
-                        |          |
-                   pp-> C    =>    A
-                       /          / \
-                  p-> B          B  C
-                       \
-                    n-> A
-                 */
-                n.left = p;     n.right = pp;    n.parent = r;
-                p.left = null;  p.right = null;  p.parent = n;
-                pp.left = null; pp.right = null; pp.parent = n;
-                update(r, n);
+    void balance(Node<T> last) {
+        if (!balanced) return;
+        while (last != null) {
+            if (last.balance() > 1) {
+                last = movelo(last);
+            } else if (last.balance() < -1) {
+                last = movehi(last);
             }
-        } else if (ppld == 0 && pprd == 2) {
-            if (pld > prd) {
-                /*
-                        RL rotation:
-                        |          |
-                   pp-> C    =>    A
-                         \        / \
-                     p-> B       C  B
-                        /
-                   n-> A
-                 */
-                n.left = pp;    n.right = p;     n.parent = r;
-                p.left = null;  p.right = null;  p.parent = n;
-                pp.left = null; pp.right = null; pp.parent = n;
-                update(r, n);
-            } else {
-                /*
-                        RR rotation:
-                        |          |
-                   pp-> C    =>    B
-                         \        / \
-                      p-> B      C  A
-                           \
-                        n-> A
-                 */
-                p.left = pp;    p.right = n;     p.parent = r;
-                pp.left = null; pp.right = null; pp.parent = p;
-                n.left = null;  n.right = null;  n.parent = p;
-                update(r, p);
-            }
+            last = last.parent;
         }
+
+        /*
+                    LL rotation:
+                |        ->        |
+                C                  B
+               / \               /   \
+              /   \             /     \
+             B    cr           A       C
+            / \               / \     / \
+           A  bl            al  ar  bl  cr
+          / \
+         al ar
+         */
+        // TODO implement LL rotation
+
+        /*
+                    LR rotation:
+                |        ->        |
+                C                  A
+               / \               /   \
+              /   \             /     \
+             B    cr           B       C
+            /  \              / \     / \
+           bl   A           bl  al  ar  cr
+               / \
+              al ar
+         */
+        // TODO implement LR rotation
+
+        /*
+                    RL rotation:
+                |        ->        |
+                C                  A
+               / \               /   \
+              /   \             /     \
+             cl    B           C       B
+                  / \         / \     / \
+                 A  br      cl  al   ar  br
+                / \
+               al ar
+
+         */
+        // TODO implement RL rotation
+
+        /*
+                    RR rotation:
+                |        ->        |
+                C                  B
+               / \               /   \
+              /   \             /     \
+             cl    B           C       A
+                  / \         / \     / \
+                bl   A      cl  bl   al  ar
+                    / \
+                   al ar
+         */
+        // TODO implement RR rotation
     }
 
     public int size() { return (root == null ? 0 : root.size); }
@@ -137,9 +180,9 @@ public class BinTree<T extends Comparable<T>> {
 
     private void inorder(Node<T> from, Consumer<T> handler) {
         if (from == null) return;
-        if (from.left != null) inorder(from.left, handler);
+        if (from.lo != null) inorder(from.lo, handler);
         handler.accept(from.val);
-        if (from.right != null) inorder(from.right, handler);
+        if (from.hi != null) inorder(from.hi, handler);
     }
 
     public void preorder(Consumer<T> handler) { preorder(root, handler); }
@@ -147,16 +190,16 @@ public class BinTree<T extends Comparable<T>> {
     private void preorder(Node<T> from, Consumer<T> handler) {
         if (from == null) return;
         handler.accept(from.val);
-        if (from.left != null) preorder(from.left, handler);
-        if (from.right != null) preorder(from.right, handler);
+        if (from.lo != null) preorder(from.lo, handler);
+        if (from.hi != null) preorder(from.hi, handler);
     }
 
     public void postorder(Consumer<T> handler) { postorder(root, handler); }
 
     private void postorder(Node<T> from, Consumer<T> handler) {
         if (from == null) return;
-        if (from.left != null) postorder(from.left, handler);
-        if (from.right != null) postorder(from.right, handler);
+        if (from.lo != null) postorder(from.lo, handler);
+        if (from.hi != null) postorder(from.hi, handler);
         handler.accept(from.val);
     }
 
@@ -164,19 +207,12 @@ public class BinTree<T extends Comparable<T>> {
         root = reverse(root);
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        return sb.toString();
-    }
-
     private Node<T> reverse(Node<T> node) {
         if (node == null) return node;
-        Node<T> l = reverse(node.right);
-        Node<T> r = reverse(node.left);
-        node.right = r;
-        node.left = l;
+        Node<T> l = node.lo;
+        Node<T> r = node.hi;
+        node.hi = reverse(l);
+        node.lo = reverse(r);
         return node;
     }
 
@@ -185,8 +221,8 @@ public class BinTree<T extends Comparable<T>> {
     static class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
         final T val;
         Node<T> parent;
-        Node<T> left;
-        Node<T> right;
+        Node<T> lo;
+        Node<T> hi;
         int size;
         int dep;
 
@@ -197,13 +233,19 @@ public class BinTree<T extends Comparable<T>> {
             this.dep = 1;
         }
 
-        static <T extends Comparable<T>> Node<T> value(Node<T> parent, T value) { return new Node<>(parent, value); }
-
         boolean isRoot() { return parent == null; }
-        boolean isLeaf() { return left == null && right == null; }
+
+        int balance() { return ((lo == null) ? 0 : lo.dep) - ((hi == null) ? 0 : hi.dep); }
+
+        void touch() {
+            size = 1 + ((lo == null) ? 0 : lo.size) + ((hi == null) ? 0 : hi.size);
+            dep = 1 + Math.max(((lo == null) ? 0 : lo.dep), ((hi == null) ? 0 : hi.dep));
+        }
 
         @Override
         public int compareTo(Node<T> that) { return this.val.compareTo(that.val); }
+
+        static <T extends Comparable<T>> Node<T> value(Node<T> parent, T value) { return new Node<>(parent, value); }
     }
 
     public static <T extends Comparable<T>> BinTree<T> empty() { return new BinTree<>(false); }
