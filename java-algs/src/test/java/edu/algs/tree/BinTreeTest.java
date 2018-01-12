@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class BinTreeTest {
 
@@ -104,6 +102,113 @@ class BinTreeTest {
         List<Integer> actual = new ArrayList<>();
         tree.inorder(actual::add);
         assertEquals(expected, actual);
+    }
+
+    /*
+
+        |    =>    |
+        3          2
+       /          / \
+      2          1  3
+     /
+    1
+     */
+    @Test
+    void rebalanceLL() {
+        BinTree<Integer> bt = mkTree(false, 3, 2, 1);
+        bt.rebalance(bt.getRoot().left.left);
+        assertEquals(2, bt.depth());
+
+        BinTree.Node<Integer> R = bt.getRoot();
+        assertEquals(Integer.valueOf(2), R.val);
+        assertNotNull(R.left);
+        assertEquals(Integer.valueOf(1), R.left.val);
+        assertNotNull(R.right);
+        assertEquals(Integer.valueOf(3), R.right.val);
+    }
+
+    /*
+    LR rotation:
+        |    =>    |
+        3          2
+       /          / \
+      1          1  3
+       \
+        2
+     */
+    @Test
+    void rebalanceLR() {
+        BinTree<Integer> bt = mkTree(false, 3, 1, 2);
+        bt.rebalance(bt.getRoot().left.right);
+        //assertEquals(2, bt.depth());
+
+        BinTree.Node<Integer> R = bt.getRoot();
+        assertEquals(Integer.valueOf(2), R.val);
+        assertNotNull(R.left);
+        assertEquals(Integer.valueOf(1), R.left.val);
+        assertNotNull(R.right);
+        assertEquals(Integer.valueOf(3), R.right.val);
+    }
+
+    /*
+    RL rotation:
+        |    =>    |
+        1          2
+         \        / \
+          3      1  3
+         /
+        2
+     */
+    @Test
+    void rebalanceRL() {
+        BinTree<Integer> bt = mkTree(false, 1, 3, 2);
+
+        bt.rebalance(bt.getRoot().right.left);
+        //assertEquals(2, bt.depth());
+
+        BinTree.Node<Integer> R = bt.getRoot();
+        assertEquals(Integer.valueOf(2), R.val);
+        assertNotNull(R.left);
+        assertEquals(Integer.valueOf(1), R.left.val);
+        assertNotNull(R.right);
+        assertEquals(Integer.valueOf(3), R.right.val);
+    }
+
+    /*
+    RR rotation:
+        |   =>     |
+        1          2
+         \        / \
+          2      1  3
+           \
+            3
+     */
+    @Test
+    void rebalanceRR() {
+        BinTree<Integer> bt = mkTree(false, 1, 2, 3);
+
+        bt.rebalance(bt.getRoot().right.right);
+        assertEquals(2, bt.depth());
+
+        BinTree.Node<Integer> R = bt.getRoot();
+        assertEquals(Integer.valueOf(2), R.val);
+        assertNotNull(R.left);
+        assertEquals(Integer.valueOf(1), R.left.val);
+        assertNotNull(R.right);
+        assertEquals(Integer.valueOf(3), R.right.val);
+    }
+
+    @Test
+    @Disabled // FIXME balancing of tree with 15 elements (4 full layers) doesn't work
+    void balance4layers() {
+        final int d = 4;
+        int n = 0;
+        for (int i=0; i<d; i++) n += (1 << i);
+
+        BinTree<Integer> tree = BinTree.empty(true);
+        for (int i=0; i<n; i++) tree.insert(i);
+
+        assertEquals(d, tree.depth());
     }
 
     private BinTree<Integer> mkTree(int ...items) { return mkTree(false, items); }
