@@ -1,11 +1,13 @@
 package edu.algs.tree;
 
+import edu.algs.array.Array;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -129,6 +131,33 @@ class BinTreeTest {
     }
 
     /*
+    RR rotation:
+        |   =>     |
+        1          2
+         \        / \
+          2      1  3
+           \
+            3
+     */
+    @Test
+    void rebalanceRR() {
+        BinTree<Integer> bt = mkTree(true, 1, 2, 3);
+        assertEquals(2, bt.depth());
+        BinTree.Node<Integer> R = bt.getRoot();
+        assertEquals(Integer.valueOf(2), R.val);
+        assertEquals(3, R.size);
+        assertEquals(2, R.dep);
+        assertNotNull(R.lo);
+        assertEquals(Integer.valueOf(1), R.lo.val);
+        assertEquals(1, R.lo.size);
+        assertEquals(1, R.lo.dep);
+        assertNotNull(R.hi);
+        assertEquals(Integer.valueOf(3), R.hi.val);
+        assertEquals(1, R.hi.size);
+        assertEquals(1, R.hi.dep);
+    }
+
+    /*
     LR rotation:
         |    =>    |
         3          2
@@ -172,54 +201,23 @@ class BinTreeTest {
         assertEquals(Integer.valueOf(3), R.hi.val);
     }
 
-    /*
-    RR rotation:
-        |   =>     |
-        1          2
-         \        / \
-          2      1  3
-           \
-            3
-     */
-    @Test
-    void rebalanceRR() {
-        BinTree<Integer> bt = mkTree(true, 1, 2, 3);
-        assertEquals(2, bt.depth());
-        BinTree.Node<Integer> R = bt.getRoot();
-        assertEquals(Integer.valueOf(2), R.val);
-        assertEquals(3, R.size);
-        assertEquals(2, R.dep);
-        assertNotNull(R.lo);
-        assertEquals(Integer.valueOf(1), R.lo.val);
-        assertEquals(1, R.lo.size);
-        assertEquals(1, R.lo.dep);
-        assertNotNull(R.hi);
-        assertEquals(Integer.valueOf(3), R.hi.val);
-        assertEquals(1, R.hi.size);
-        assertEquals(1, R.hi.dep);
-    }
-
     @Test
     void balance3l() {
         final int d = 3; // 3 full layers of the tree
-        int n = 0;
-        for (int i=0; i<d; i++) n += (1 << i);
-
+        int n = (1 << d) - 1;
         BinTree<Integer> tree = BinTree.empty(true);
         for (int i=0; i<n; i++) tree.insert(i);
-
+        assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
     }
 
     @Test
     void balance10l() {
         final int d = 10; // 10 full layers of the tree
-        int n = 0;
-        for (int i=0; i<d; i++) n += (1 << i);
-
+        int n = (1 << d) - 1;
         BinTree<Integer> tree = BinTree.empty(true);
         for (int i=0; i<n; i++) tree.insert(i);
-
+        assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
     }
 
@@ -229,7 +227,7 @@ class BinTreeTest {
         final int n = 3; // 3 elements in the tree
         BinTree<Integer> tree = BinTree.empty(true);
         for (int i=0; i<n; i++) tree.insert(i);
-
+        assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
     }
 
@@ -239,8 +237,45 @@ class BinTreeTest {
         final int n = 15; // 15 elements in the tree
         BinTree<Integer> tree = BinTree.empty(true);
         for (int i=0; i<n; i++) tree.insert(i);
-
+        assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
+    }
+
+    @Test
+    void random4l() {
+        final int d = 4; // 4 full layers
+        int n = (1 << d) - 1;
+        BinTree<Integer> tree = BinTree.empty(true);
+        int a[] = mkRandom(n);
+        for (int i=0; i<n; i++) {
+            tree.insert(a[i]);
+            System.out.println("insert(" + a[i] + ")");
+            System.out.println(tree.shape(3));
+        }
+        assertEquals(n, tree.size());
+        assertTrue(d+1 >= tree.depth(), "Tree depth outgrows balance max by 1 layer");
+
+        List<Integer> actual = new ArrayList<>();
+        tree.inorder(actual::add);
+
+        Arrays.sort(a);
+        int b[] = new int[n];
+        for (int i=0; i<n; i++) b[i] = actual.get(i);
+
+        assertArrayEquals(a, b);
+    }
+
+    @Test
+    void build() {
+        BinTree<Integer> bt = BinTree.sorted(new Integer[] {1, 2, 3});
+        assertEquals(2, bt.depth());
+        assertEquals(3, bt.size());
+
+        assertEquals(Integer.valueOf(2), bt.getRoot().val);
+        assertNotNull(bt.getRoot().lo);
+        assertEquals(Integer.valueOf(1), bt.getRoot().lo.val);
+        assertNotNull(bt.getRoot().hi);
+        assertEquals(Integer.valueOf(3), bt.getRoot().hi.val);
     }
 
     private BinTree<Integer> mkTree(int ...items) { return mkTree(false, items); }
@@ -249,5 +284,16 @@ class BinTreeTest {
         BinTree<Integer> tree = BinTree.empty(balanced);
         for (int i=0; i<items.length; i++) tree.insert(items[i]);
         return tree;
+    }
+
+    private static int[] mkRandom(int n) {
+        Random random = new Random(42L);
+        int a[] = new int[n];
+        for (int i=0; i<n; i++) a[i] = i;
+        for (int i=0; i<n-2; i++) {
+            int j = i + 1 + random.nextInt(n-2-i);
+            Array.swap(a, i, j);
+        }
+        return a;
     }
 }

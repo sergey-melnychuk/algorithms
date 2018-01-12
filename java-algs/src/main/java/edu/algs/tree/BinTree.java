@@ -1,5 +1,6 @@
 package edu.algs.tree;
 
+import java.util.*;
 import java.util.function.Consumer;
 
 public class BinTree<T extends Comparable<T>> {
@@ -10,6 +11,19 @@ public class BinTree<T extends Comparable<T>> {
     BinTree(boolean balanced, T val) { this.balanced = balanced; root = Node.value(null, val); }
 
     Node<T> getRoot() { return root; }
+    void setRoot(Node<T> root) { this.root = root; }
+
+    Node<T> min() {
+        Node<T> n = root;
+        while (n.lo != null) n = n.lo;
+        return n;
+    }
+
+    Node<T> max() {
+        Node<T> n = root;
+        while (n.hi != null) n = n.hi;
+        return n;
+    }
 
     public boolean contains(T val) {
         if (root == null) return false;
@@ -50,19 +64,17 @@ public class BinTree<T extends Comparable<T>> {
         if (from == null) return;
         Node<T> n = from;
         while (n != to) {
-            n.parent.size += 1;
-            n.parent.dep = 1 + Math.max(
-                    (n.parent.lo == null ? 0 : n.parent.lo.dep),
-                    (n.parent.hi == null ? 0 : n.parent.hi.dep));
+            n.touch();
             n = n.parent;
         }
+        to.touch();
     }
 
     /*                     C
-           A      ->      / \
+        at=A      ->      / \
          /  \            A  cr
         /    \          / \
-       B      C        B   cl
+    B      to=C        B   cl
       / \    / \      / \
     bl  bh cl  ch   bl  bh
      */
@@ -70,6 +82,7 @@ public class BinTree<T extends Comparable<T>> {
         Node<T> to = at.hi;
         Node<T> p = at.parent;
         at.hi = to.lo;
+        if (at.hi != null) at.hi.parent = at;
         to.lo = at;
         put(p, to);
         at.parent = to;
@@ -80,10 +93,10 @@ public class BinTree<T extends Comparable<T>> {
     }
 
     /*                     B
-           A      ->      / \
+        at=A      ->      / \
          /  \           bl   A
         /    \              / \
-       B      C           bh   C
+    to=B      C           bh   C
       / \    / \              / \
     bl  bh cl  ch           cl  ch
      */
@@ -91,6 +104,7 @@ public class BinTree<T extends Comparable<T>> {
         Node<T> to = at.lo;
         Node<T> p = at.parent;
         at.lo = to.hi;
+        if (at.lo != null) at.lo.parent = at;
         to.hi = at;
         put(p, to);
         at.parent = to;
@@ -176,31 +190,54 @@ public class BinTree<T extends Comparable<T>> {
 
     public boolean isEmpty() { return root == null; }
 
-    public void inorder(Consumer<T> handler) { inorder(root, handler); }
+    public void inorder(Consumer<T> handler) { inorder(root, n -> handler.accept(n.val)); }
 
-    private void inorder(Node<T> from, Consumer<T> handler) {
+    void inorder(Node<T> from, Consumer<Node<T>> handler) {
         if (from == null) return;
         if (from.lo != null) inorder(from.lo, handler);
-        handler.accept(from.val);
+        handler.accept(from);
         if (from.hi != null) inorder(from.hi, handler);
     }
 
-    public void preorder(Consumer<T> handler) { preorder(root, handler); }
+    public void preorder(Consumer<T> handler) { preorder(root, n -> handler.accept(n.val)); }
 
-    private void preorder(Node<T> from, Consumer<T> handler) {
+    void preorder(Node<T> from, Consumer<Node<T>> handler) {
         if (from == null) return;
-        handler.accept(from.val);
+        handler.accept(from);
         if (from.lo != null) preorder(from.lo, handler);
         if (from.hi != null) preorder(from.hi, handler);
     }
 
-    public void postorder(Consumer<T> handler) { postorder(root, handler); }
+    public void postorder(Consumer<T> handler) { postorder(root, n -> handler.accept(n.val)); }
 
-    private void postorder(Node<T> from, Consumer<T> handler) {
+    void postorder(Node<T> from, Consumer<Node<T>> handler) {
         if (from == null) return;
         if (from.lo != null) postorder(from.lo, handler);
         if (from.hi != null) postorder(from.hi, handler);
-        handler.accept(from.val);
+        handler.accept(from);
+    }
+
+    void bfs(Node<T> from, Consumer<Node<T>> handler) {
+        Queue<Node<T>> q = new LinkedList<>();
+        q.add(from);
+        while (!q.isEmpty()) {
+            Node<T> n = q.poll();
+            handler.accept(n);
+            if (n.lo != null) q.offer(n.lo);
+            if (n.hi != null) q.offer(n.hi);
+        }
+    }
+
+    void dfs(Node<T> from, Consumer<Node<T>> handler) {
+        Set<T> seen = new HashSet<>();
+        Stack<Node<T>> stack = new Stack<>();
+        stack.push(from);
+        while (!stack.isEmpty()) {
+            Node<T> n = stack.peek();
+            if      (n.lo != null && !seen.contains(n.lo.val)) stack.push(n.lo);
+            else if (n.hi != null && !seen.contains(n.hi.val)) stack.push(n.hi);
+            else    { handler.accept(n); seen.add(n.val); stack.pop(); }
+        }
     }
 
     public void reverse() {
@@ -217,6 +254,53 @@ public class BinTree<T extends Comparable<T>> {
     }
 
     private boolean less(T lhs, T rhs) { return lhs.compareTo(rhs) < 0; }
+
+    private int level(Node<T> node) {
+        Node<T> n = node;
+        int lvl = 0;
+        while (n.parent != null) {
+            lvl += 1;
+            n = n.parent;
+        }
+        return lvl;
+    }
+
+    String shape(int w) {
+        List<Node<T>> nodes = new ArrayList<>();
+        inorder(root, nodes::add);
+
+        int maxidx = nodes.size();
+        int maxlvl = 0;
+        for (Node<T> n : nodes) {
+            int l = level(n);
+            if (l > maxlvl) maxlvl = l;
+        }
+
+        StringBuilder sb0 = new StringBuilder();
+        for (int i=0; i<w; i++) sb0.append(' ');
+        String empty = sb0.toString();
+
+        String tree[][] = new String[maxidx][maxlvl+1];
+        for (int i=0; i<maxidx; i++) {
+            int l = level(nodes.get(i));
+            tree[i][l] = String.format("%" + w + "s", nodes.get(i).val.toString());
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int j=0; j<maxlvl+1; j++) {
+            for (int i=0; i<maxidx; i++) {
+                String s = tree[i][j];
+                sb.append((s == null) ? empty : s);
+            }
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
+
+    boolean deepEquals(BinTree<T> that) {
+        if (root == null) return that.root == null;
+        return root.deepEquals(that.root);
+    }
 
     static class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
         final T val;
@@ -235,6 +319,8 @@ public class BinTree<T extends Comparable<T>> {
 
         boolean isRoot() { return parent == null; }
 
+        boolean isLeaf() { return (lo == null) && (hi == null); }
+
         int balance() { return ((lo == null) ? 0 : lo.dep) - ((hi == null) ? 0 : hi.dep); }
 
         void touch() {
@@ -245,6 +331,18 @@ public class BinTree<T extends Comparable<T>> {
         @Override
         public int compareTo(Node<T> that) { return this.val.compareTo(that.val); }
 
+        @Override
+        public String toString() { return val.toString(); }
+
+        boolean deepEquals(Node<T> that) {
+            if (that == null) return false;
+            return ((that.val == null && this.val == null) || that.val.equals(this.val)) &&
+                    ((that.lo == null && this.lo == null) || that.lo.deepEquals(this.lo) ) &&
+                    ((that.hi == null && this.hi == null) || that.hi.deepEquals(this.hi) ) &&
+                    (that.size == this.size) &&
+                    (that.dep == this.dep);
+        }
+
         static <T extends Comparable<T>> Node<T> value(Node<T> parent, T value) { return new Node<>(parent, value); }
     }
 
@@ -252,4 +350,26 @@ public class BinTree<T extends Comparable<T>> {
     public static <T extends Comparable<T>> BinTree<T> empty(boolean balanced) { return new BinTree<>(balanced); }
     public static <T extends Comparable<T>> BinTree<T> one(T val) { return new BinTree<>(true, val); }
     public static <T extends Comparable<T>> BinTree<T> one(boolean balanced, T val) { return new BinTree<>(balanced, val); }
+
+    public static <T extends Comparable<T>> BinTree<T> sorted(T a[]) {
+        Node<T> root = build(a, 0, a.length-1, null);
+        BinTree<T> tree = new BinTree<>(true);
+        tree.setRoot(root);
+        return tree;
+    }
+
+    public static <T extends Comparable<T>> BinTree<T> build(T a[]) {
+        Arrays.sort(a);
+        return sorted(a);
+    }
+
+    static <T extends Comparable<T>> Node<T> build(T a[], int lo, int hi, Node<T> parent) {
+        if (lo > hi) return null;
+        int m = lo + (hi-lo) / 2;
+        Node<T> node = Node.value(parent, a[m]);
+        node.lo = build(a, lo, m-1, node);
+        node.hi = build(a, m+1, hi, node);
+        node.touch();
+        return node;
+    }
 }
