@@ -104,6 +104,24 @@ class BinTreeTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    void dfs() {
+        BinTree<Integer> bt = BinTree.sorted(new Integer[] {1,2,3,4,5,6,7});
+        List<Integer> exp = Arrays.asList(1,3,2,5,7,6,4); // same as post-order
+        List<Integer> act = new ArrayList<>();
+        bt.dfs(act::add);
+        assertEquals(exp, act);
+    }
+
+    @Test
+    void bfs() {
+        BinTree<Integer> bt = BinTree.sorted(new Integer[] {1,2,3,4,5,6,7});
+        List<Integer> exp = Arrays.asList(4,2,6,1,3,5,7); // same as pre-order
+        List<Integer> act = new ArrayList<>();
+        bt.bfs(act::add);
+        assertEquals(exp, act);
+    }
+
     /*
 
         |    =>    |
@@ -242,28 +260,13 @@ class BinTreeTest {
     }
 
     @Test
-    void random4l() {
-        final int d = 4; // 4 full layers
-        int n = (1 << d) - 1;
-        BinTree<Integer> tree = BinTree.empty(true);
-        int a[] = mkRandom(n);
-        for (int i=0; i<n; i++) {
-            tree.insert(a[i]);
-            System.out.println("insert(" + a[i] + ")");
-            System.out.println(tree.shape(3));
-        }
-        assertEquals(n, tree.size());
-        assertTrue(d+1 >= tree.depth(), "Tree depth outgrows balance max by 1 layer");
+    void random4l() { random(4, 1); }
 
-        List<Integer> actual = new ArrayList<>();
-        tree.inorder(actual::add);
+    @Test
+    void random10l() { random(10, 3); }
 
-        Arrays.sort(a);
-        int b[] = new int[n];
-        for (int i=0; i<n; i++) b[i] = actual.get(i);
-
-        assertArrayEquals(a, b);
-    }
+    @Test
+    void random20l() { random(20, 5); }
 
     @Test
     void build() {
@@ -276,6 +279,33 @@ class BinTreeTest {
         assertEquals(Integer.valueOf(1), bt.getRoot().lo.val);
         assertNotNull(bt.getRoot().hi);
         assertEquals(Integer.valueOf(3), bt.getRoot().hi.val);
+    }
+
+    private void random(int d, int relaxation) { random(d, relaxation, false); }
+
+    private void random(int d, int relaxation, boolean debug) {
+        int n = (1 << d) - 1;
+        BinTree<Integer> tree = BinTree.empty(true);
+        int a[] = mkRandom(n);
+        for (int i=0; i<n; i++) {
+            tree.insert(a[i]);
+            if (debug) {
+                System.out.println("insert(" + a[i] + ")");
+                System.out.println(tree.shape(3));
+            }
+        }
+        assertEquals(n, tree.size());
+        int e = d + relaxation;
+        assertTrue(e >= tree.depth(), String.format("Got %d, expected <%d", tree.depth(), e));
+
+        List<Integer> actual = new ArrayList<>();
+        tree.inorder(actual::add);
+
+        Arrays.sort(a);
+        int b[] = new int[n];
+        for (int i=0; i<n; i++) b[i] = actual.get(i);
+
+        assertArrayEquals(a, b);
     }
 
     private BinTree<Integer> mkTree(int ...items) { return mkTree(false, items); }

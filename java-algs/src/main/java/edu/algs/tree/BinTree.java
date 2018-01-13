@@ -114,7 +114,6 @@ public class BinTree<T extends Comparable<T>> {
         return to;
     }
 
-    // Detect if re-balancing required for a given subtree and perform the rotation
     void balance(Node<T> last) {
         if (!balanced) return;
         while (last != null) {
@@ -125,63 +124,6 @@ public class BinTree<T extends Comparable<T>> {
             }
             last = last.parent;
         }
-
-        /*
-                    LL rotation:
-                |        ->        |
-                C                  B
-               / \               /   \
-              /   \             /     \
-             B    cr           A       C
-            / \               / \     / \
-           A  bl            al  ar  bl  cr
-          / \
-         al ar
-         */
-        // TODO implement LL rotation
-
-        /*
-                    LR rotation:
-                |        ->        |
-                C                  A
-               / \               /   \
-              /   \             /     \
-             B    cr           B       C
-            /  \              / \     / \
-           bl   A           bl  al  ar  cr
-               / \
-              al ar
-         */
-        // TODO implement LR rotation
-
-        /*
-                    RL rotation:
-                |        ->        |
-                C                  A
-               / \               /   \
-              /   \             /     \
-             cl    B           C       B
-                  / \         / \     / \
-                 A  br      cl  al   ar  br
-                / \
-               al ar
-
-         */
-        // TODO implement RL rotation
-
-        /*
-                    RR rotation:
-                |        ->        |
-                C                  B
-               / \               /   \
-              /   \             /     \
-             cl    B           C       A
-                  / \         / \     / \
-                bl   A      cl  bl   al  ar
-                    / \
-                   al ar
-         */
-        // TODO implement RR rotation
     }
 
     public int size() { return (root == null ? 0 : root.size); }
@@ -217,6 +159,8 @@ public class BinTree<T extends Comparable<T>> {
         handler.accept(from);
     }
 
+    public void bfs(Consumer<T> handler) { bfs(root, n -> handler.accept(n.val)); }
+
     void bfs(Node<T> from, Consumer<Node<T>> handler) {
         Queue<Node<T>> q = new LinkedList<>();
         q.add(from);
@@ -228,15 +172,17 @@ public class BinTree<T extends Comparable<T>> {
         }
     }
 
+    public void dfs(Consumer<T> handler) { dfs(root, n -> handler.accept(n.val)); }
+
     void dfs(Node<T> from, Consumer<Node<T>> handler) {
-        Set<T> seen = new HashSet<>();
+        Set<Node<T>> seen = new HashSet<>();
         Stack<Node<T>> stack = new Stack<>();
         stack.push(from);
         while (!stack.isEmpty()) {
             Node<T> n = stack.peek();
-            if      (n.lo != null && !seen.contains(n.lo.val)) stack.push(n.lo);
-            else if (n.hi != null && !seen.contains(n.hi.val)) stack.push(n.hi);
-            else    { handler.accept(n); seen.add(n.val); stack.pop(); }
+            if      (n.lo != null && !seen.contains(n.lo)) stack.push(n.lo);
+            else if (n.hi != null && !seen.contains(n.hi)) stack.push(n.hi);
+            else    { handler.accept(n); seen.add(n); stack.pop(); }
         }
     }
 
@@ -333,6 +279,21 @@ public class BinTree<T extends Comparable<T>> {
 
         @Override
         public String toString() { return val.toString(); }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node<?> node = (Node<?>) o;
+            return size == node.size &&
+                    dep == node.dep &&
+                    Objects.equals(val, node.val);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(val, size, dep);
+        }
 
         boolean deepEquals(Node<T> that) {
             if (that == null) return false;
