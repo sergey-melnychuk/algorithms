@@ -19,11 +19,10 @@ public class BinTree<T extends Comparable<T>> {
     public boolean contains(T val) {
         if (root == null) return false;
         Node<T> at = root;
-        while (at != null) {
-            if (at.val.equals(val)) return true;
-            else at = less(val, at.val) ? at.lo : at.hi;
+        while (at != null && !at.val.equals(val)) {
+            at = less(val, at.val) ? at.lo : at.hi;
         }
-        return false;
+        return at != null;
     }
 
     public void insert(T val) {
@@ -39,6 +38,8 @@ public class BinTree<T extends Comparable<T>> {
 
         Node<T> node = Node.value(at, val);
         put(node, at);
+
+        postInsert(node);
     }
 
     public void inorder(Consumer<T> handler) { inorder(root, n -> handler.accept(n.val)); }
@@ -60,56 +61,10 @@ public class BinTree<T extends Comparable<T>> {
     public boolean isEmpty() { return root == null; }
 
 
-
-    static class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
-        final T val;
-        Node<T> parent;
-        Node<T> lo;
-        Node<T> hi;
-        int size;
-        int dep;
-
-        Node(Node<T> parent, T val) {
-            this.parent = parent;
-            this.val = val;
-            this.size = 1;
-            this.dep = 1;
-        }
-
-        boolean isRoot() { return parent == null; }
-
-        boolean isLeaf() { return (lo == null) && (hi == null); }
-
-        int balance() { return ((lo == null) ? 0 : lo.dep) - ((hi == null) ? 0 : hi.dep); }
-
-        void touch() {
-            size = 1 + ((lo == null) ? 0 : lo.size) + ((hi == null) ? 0 : hi.size);
-            dep = 1 + Math.max(((lo == null) ? 0 : lo.dep), ((hi == null) ? 0 : hi.dep));
-        }
-
-        @Override
-        public int compareTo(Node<T> that) { return this.val.compareTo(that.val); }
-
-        @Override
-        public String toString() { return "Node{" + val.toString() + "}"; }
-
-        @Override
-        public int hashCode() { return Objects.hash(val, size, dep); }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Node<?> node = (Node<?>) o;
-            return (size == node.size) && (dep == node.dep) && Objects.equals(val, node.val);
-        }
-
-        static <T extends Comparable<T>> Node<T> value(Node<T> parent, T value) { return new Node<>(parent, value); }
-    }
-
-
     /* ********** Package-accessed internal methods ********** */
 
+
+    void postInsert(Node<T> last) {}
 
     Node<T> getRoot() { return root; }
     void setRoot(Node<T> root) { this.root = root; }
@@ -127,7 +82,7 @@ public class BinTree<T extends Comparable<T>> {
     private boolean less(T lhs, T rhs) { return lhs.compareTo(rhs) < 0; }
 
     void put(Node<T> n, Node<T> p) {
-        if (p == null) return;
+        if (p == null) { root = n; return; }
         if (less(n.val, p.val)) p.lo = n; else p.hi = n;
         touch(n);
     }
