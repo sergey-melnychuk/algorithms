@@ -1,18 +1,34 @@
 package edu.algs.tree;
 
+import java.util.function.Function;
+
 // Binary Search Tree
 public class BSTree<T extends Comparable<T>> extends BinTree<T> {
+    private final Function<Node<T>, Node<T>> L = this::moveL;
+    private final Function<Node<T>, Node<T>> H = this::moveH;
+    private final Function<Node<T>, Node<T>> LH = this::moveLH;
+    private final Function<Node<T>, Node<T>> HL = this::moveHL;
+    private final Function<Node<T>, Node<T>> IDENTITY = n -> n;
 
     @Override
     void postInsert(Node<T> last) {
         Node<T> n = last.parent;
         while (n != null) {
-            int ds = n.ds();
-            if (Math.abs(ds) > 1) {
-                if (ds < 0) n = moveH(n); else n = moveL(n);
-            }
+            Function<Node<T>, Node<T>> f = detect(n);
+            n = f.apply(n);
             n = n.parent;
         }
+    }
+
+    Function<Node<T>, Node<T>> detect(Node<T> at) {
+        int ds = at.ds();
+        if (Math.abs(ds) > 1) {
+            return (ds < 0) ? H : L;
+        }
+
+        // TODO implement detection of HL/LH moves as well
+
+        return IDENTITY;
     }
 
     /*                  to=C

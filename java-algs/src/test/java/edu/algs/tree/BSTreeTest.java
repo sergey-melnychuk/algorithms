@@ -154,11 +154,11 @@ class BSTreeTest {
         assertEquals(1, R.hi.dep);
     }
 
-    @Test @Disabled
+    @Test
     void balance3l() {
         final int d = 3; // 3 full layers of the tree
         int n = (1 << d) - 1;
-        BinTree<Integer> tree = BinTree.empty();
+        BSTree<Integer> tree = new BSTree<>();
         for (int i=0; i<n; i++) tree.insert(i);
         assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
@@ -168,27 +168,27 @@ class BSTreeTest {
     void balance10l() {
         final int d = 10; // 10 full layers of the tree
         int n = (1 << d) - 1;
-        BinTree<Integer> tree = BinTree.empty();
+        BSTree<Integer> tree = new BSTree<>();
         for (int i=0; i<n; i++) tree.insert(i);
         assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
     }
 
-    @Test @Disabled
+    @Test
     void balance3e() {
         final int d = 2;
         final int n = 3; // 3 elements in the tree
-        BinTree<Integer> tree = BinTree.empty();
+        BSTree<Integer> tree = new BSTree<>();
         for (int i=0; i<n; i++) tree.insert(i);
         assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
     }
 
-    @Test @Disabled
+    @Test
     void balance15e() {
         final int d = 4;
         final int n = 15; // 15 elements in the tree
-        BinTree<Integer> tree = BinTree.empty();
+        BSTree<Integer> tree = new BSTree<>();
         for (int i=0; i<n; i++) tree.insert(i);
         assertEquals(n, tree.size());
         assertEquals(d, tree.depth());
