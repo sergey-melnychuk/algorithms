@@ -82,8 +82,8 @@ public class BinTree<T extends Comparable<T>> {
     private boolean less(T lhs, T rhs) { return lhs.compareTo(rhs) < 0; }
 
     void put(Node<T> n, Node<T> p) {
-        if (p == null) { root = n; return; }
-        if (less(n.val, p.val)) p.lo = n; else p.hi = n;
+        if (p == null) root = n;
+        else if (less(n.val, p.val)) p.lo = n; else p.hi = n;
         touch(n);
     }
 

@@ -23,8 +23,18 @@ class BSTreeTest {
      */
     @Test
     void moveL() {
-        BSTree<Integer> bt = mkTree(3, 2, 1);
-        Node<Integer> R = bt.getRoot();
+        Node<Integer> T = Node.value(null, 3);
+        Node<Integer> L = Node.value(T, 2);
+        Node<Integer> LL = Node.value(L, 1);
+        T.lo = L;
+        L.lo = LL;
+        LL.touch();
+        L.touch();
+
+        BSTree<Integer> bt = new BSTree<>();
+        bt.setRoot(T);
+
+        Node<Integer> R = bt.moveL(T);
         assertEquals(Integer.valueOf(2), R.val);
         assertEquals(3, R.size, "size");
         assertEquals(2, R.dep, "depth");
@@ -48,9 +58,18 @@ class BSTreeTest {
      */
     @Test
     void moveH() {
-        BinTree<Integer> bt = mkTree(1, 2, 3);
-        assertEquals(2, bt.depth());
-        Node<Integer> R = bt.getRoot();
+        Node<Integer> T = Node.value(null, 1);
+        Node<Integer> H = Node.value(T, 2);
+        Node<Integer> HH = Node.value(H, 3);
+        T.hi = H;
+        H.hi = HH;
+        HH.touch();
+        H.touch();
+
+        BSTree<Integer> bt = new BSTree<>();
+        bt.setRoot(T);
+
+        Node<Integer> R = bt.moveH(T);
         assertEquals(Integer.valueOf(2), R.val);
         assertEquals(3, R.size);
         assertEquals(2, R.dep);
@@ -74,14 +93,30 @@ class BSTreeTest {
      */
     @Test
     void moveLH() {
-        BinTree<Integer> bt = mkTree(3, 1, 2);
-        assertEquals(2, bt.depth());
-        Node<Integer> R = bt.getRoot();
+        Node<Integer> T = Node.value(null, 3);
+        Node<Integer> L = Node.value(T, 1);
+        Node<Integer> H = Node.value(L, 2);
+        T.lo = L;
+        L.hi = H;
+        L.touch();
+        H.touch();
+
+        BSTree<Integer> bt = new BSTree<>();
+        bt.setRoot(T);
+
+        Node<Integer> R = bt.moveLH(T);
+
         assertEquals(Integer.valueOf(2), R.val);
+        assertEquals(3, R.size);
+        assertEquals(2, R.dep);
         assertNotNull(R.lo);
         assertEquals(Integer.valueOf(1), R.lo.val);
+        assertEquals(1, R.lo.size);
+        assertEquals(1, R.lo.dep);
         assertNotNull(R.hi);
         assertEquals(Integer.valueOf(3), R.hi.val);
+        assertEquals(1, R.hi.size);
+        assertEquals(1, R.hi.dep);
     }
 
     /*
@@ -94,14 +129,29 @@ class BSTreeTest {
      */
     @Test
     void moveHL() {
-        BinTree<Integer> bt = mkTree(1, 3, 2);
-        assertEquals(2, bt.depth());
-        Node<Integer> R = bt.getRoot();
+        Node<Integer> T = Node.value(null, 1);
+        Node<Integer> H = Node.value(T, 3);
+        Node<Integer> L = Node.value(H, 2);
+        T.hi = H;
+        H.lo = L;
+        H.touch();
+        T.touch();
+
+        BSTree<Integer> bt = new BSTree<>();
+        bt.setRoot(T);
+
+        Node<Integer> R = bt.moveHL(T);
         assertEquals(Integer.valueOf(2), R.val);
+        assertEquals(3, R.size);
+        assertEquals(2, R.dep);
         assertNotNull(R.lo);
         assertEquals(Integer.valueOf(1), R.lo.val);
+        assertEquals(1, R.lo.size);
+        assertEquals(1, R.lo.dep);
         assertNotNull(R.hi);
         assertEquals(Integer.valueOf(3), R.hi.val);
+        assertEquals(1, R.hi.size);
+        assertEquals(1, R.hi.dep);
     }
 
     @Test @Disabled

@@ -23,7 +23,7 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
       / \    / \      / \
     bl  bh cl  ch   bl  bh
      */
-    private Node<T> moveH(Node<T> at) {
+    Node<T> moveH(Node<T> at) {
         Node<T> to = at.hi;
         to.parent = at.parent;
         at.parent = to;
@@ -33,7 +33,7 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
         at.touch();
         to.touch();
         put(to, to.parent);
-        return at;
+        return to;
     }
 
     /*                     B=to
@@ -44,7 +44,7 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
       / \    / \              / \
     bl  bh cl  ch           cl  ch
      */
-    private Node<T> moveL(Node<T> at) {
+    Node<T> moveL(Node<T> at) {
         Node<T> to = at.lo;
         to.parent = at.parent;
         at.parent = to;
@@ -61,27 +61,63 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
         at=A     =>      C=to
          /  \          /  \
        al    \        /    \
-             B    at=A      B
+           m=B    at=A    m=B
             / \     / \    / \
         to=C   bh  al cl  ch bh
           / \
         cl  ch
      */
-    private Node<T> moveHL(Node<T> at) {
-        return at; //TODO
+    Node<T> moveHL(Node<T> at) {
+        Node<T> m = at.hi;
+        Node<T> to = at.hi.lo;
+        to.parent = at.parent;
+
+        at.hi = to.lo;
+        if (to.lo != null) to.lo.parent = at;
+
+        m.lo = to.hi;
+        if (to.hi != null) to.hi.parent = m;
+
+        to.lo = at;
+        to.hi = m;
+        m.parent = to;
+        at.parent = to;
+
+        at.touch();
+        m.touch();
+        put(to, to.parent);
+        return to;
     }
 
     /*
         at=A     =>      C=to
          /  \          /  \
         /   ah        /    \
-       B             B      A=at
+     m=B           m=B      A=at
       / \           / \    / \
      bl  C=to      bl cl  ch ah
         / \
        cl ch
      */
-    private Node<T> moveLH(Node<T> at) {
-        return at; //TODO
+    Node<T> moveLH(Node<T> at) {
+        Node<T> m = at.lo;
+        Node<T> to = m.hi;
+        to.parent = at.parent;
+
+        m.hi = to.lo;
+        if (m.hi != null) m.hi.parent = m;
+
+        at.lo = to.hi;
+        if (at.lo != null) at.lo.parent = at;
+
+        to.lo = m;
+        to.hi = at;
+        m.parent = to;
+        at.parent = to;
+
+        at.touch();
+        m.touch();
+        put(to, to.parent);
+        return to;
     }
 }
