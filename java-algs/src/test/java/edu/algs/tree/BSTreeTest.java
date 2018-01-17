@@ -157,16 +157,31 @@ class BSTreeTest {
     void ordered2() { ordered(2, 0); }
 
     @Test
-    void ordered3() { ordered(3, 2); }
+    void ordered3() { ordered(3, 0); }
 
     @Test
-    void ordered5() { ordered(5, 6); }
+    void ordered5() { ordered(5, 1); }
+
+    @Test
+    void ordered10() { ordered(10, 5); }
+
+    @Test
+    void ordered15() { ordered(15, 7); }
+
+    @Test
+    void ordered20() { ordered(20, 8); }
 
     @Test
     void random5() { random(5, 4); }
 
     @Test
-    void random10() { random(10, 15); }
+    void random10() { random(10, 13); }
+
+    @Test
+    void random15() { random(15, 19); }
+
+    @Test
+    void random20() { random(20, 36); }
 
     private void ordered(int d, int relaxation) { ordered(d, relaxation, false); }
 
@@ -176,8 +191,7 @@ class BSTreeTest {
         for (int i=0; i<n; i++) tree.insert(i);
         if (debug) System.out.println(tree.shape(3));
         assertEquals(n, tree.size());
-        int e = d + relaxation;
-        assertTrue(e >= tree.depth(), String.format("Failed %d >= %d", e, tree.depth()));
+        assertEquals(d + relaxation, tree.depth(), "depth");
     }
 
     private void random(int d, int relaxation) { random(d, relaxation, false); }
@@ -194,8 +208,7 @@ class BSTreeTest {
             }
         }
         assertEquals(n, tree.size());
-        int e = d + relaxation;
-        assertTrue(e >= tree.depth(), String.format("Got %d, expected <%d", tree.depth(), e));
+        assertEquals(d + relaxation, tree.depth(), "depth");
 
         List<Integer> actual = new ArrayList<>();
         tree.inorder(actual::add);

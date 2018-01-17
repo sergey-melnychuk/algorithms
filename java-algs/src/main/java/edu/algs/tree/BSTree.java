@@ -22,7 +22,7 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
 
     Function<Node<T>, Node<T>> detect(Node<T> at) {
         int b = at.balance();
-        //if (Math.abs(ds) > 1) return (ds < 0) ? H : L;
+        if (Math.abs(b) <= 1) return IDENTITY;
 
         int l = (at.lo == null) ? 0 : at.lo.size;
         int h = (at.hi == null) ? 0 : at.hi.size;
@@ -34,15 +34,14 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
     }
 
     Function<Node<T>, Node<T>> decide(int b, int l, int h, int lhh, int hll) {
-        if (Math.abs(b) <= 1) return IDENTITY;
         if (b > 0) {
-            int lb = b - 2 - l;
-            int lhhb = b - 2 - lhh;
-            return (lhh > 0 && Math.abs(lhhb) < Math.abs(lb)) ? LH : L;
+            int dl = 2 + l;
+            int dlhh = 2 + lhh;
+            return (b - dlhh < b - dl) ? LH : L;
         } else {
-            int hb = b + 2 + h;
-            int hllb = b + 2 + hll;
-            return (hll > 0 && Math.abs(hllb) < Math.abs(hb)) ? HL : H;
+            int dh = 2 + h;
+            int dhll = 2 + hll;
+            return (b - dhll < b - dh) ? HL : H;
         }
     }
 
