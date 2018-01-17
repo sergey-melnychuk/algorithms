@@ -1,7 +1,6 @@
 package edu.algs.tree;
 
 import edu.algs.array.Array;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -154,51 +153,32 @@ class BSTreeTest {
         assertEquals(1, R.hi.dep);
     }
 
-    @Test @Disabled //FIXME
-    void balance3l() {
-        final int d = 3; // 3 full layers of the tree
+    @Test
+    void ordered2() { ordered(2, 0); }
+
+    @Test
+    void ordered3() { ordered(3, 2); }
+
+    @Test
+    void ordered5() { ordered(5, 6); }
+
+    @Test
+    void random5() { random(5, 4); }
+
+    @Test
+    void random10() { random(10, 15); }
+
+    private void ordered(int d, int relaxation) { ordered(d, relaxation, false); }
+
+    private void ordered(int d, int relaxation, boolean debug) {
         int n = (1 << d) - 1;
         BSTree<Integer> tree = new BSTree<>();
         for (int i=0; i<n; i++) tree.insert(i);
+        if (debug) System.out.println(tree.shape(3));
         assertEquals(n, tree.size());
-        assertEquals(d, tree.depth());
+        int e = d + relaxation;
+        assertTrue(e >= tree.depth(), String.format("Failed %d >= %d", e, tree.depth()));
     }
-
-    @Test @Disabled //FIXME
-    void balance10l() {
-        final int d = 10; // 10 full layers of the tree
-        int n = (1 << d) - 1;
-        BSTree<Integer> tree = new BSTree<>();
-        for (int i=0; i<n; i++) tree.insert(i);
-        assertEquals(n, tree.size());
-        assertEquals(d, tree.depth());
-    }
-
-    @Test @Disabled //FIXME
-    void balance3e() {
-        final int d = 2;
-        final int n = 3; // 3 elements in the tree
-        BSTree<Integer> tree = new BSTree<>();
-        for (int i=0; i<n; i++) tree.insert(i);
-        assertEquals(n, tree.size());
-        assertEquals(d, tree.depth());
-    }
-
-    @Test @Disabled //FIXME
-    void balance15e() {
-        final int d = 4;
-        final int n = 15; // 15 elements in the tree
-        BSTree<Integer> tree = new BSTree<>();
-        for (int i=0; i<n; i++) tree.insert(i);
-        assertEquals(n, tree.size());
-        assertEquals(d, tree.depth());
-    }
-
-    @Test @Disabled //FIXME
-    void random4l() { random(4, 1); }
-
-    @Test @Disabled //FIXME
-    void random10l() { random(10, 1); }
 
     private void random(int d, int relaxation) { random(d, relaxation, false); }
 
@@ -227,20 +207,19 @@ class BSTreeTest {
         assertArrayEquals(a, b);
     }
 
-    private static int[] mkRandom(int n) {
-        Random random = new Random(42L);
+    private static int[] mkOrdered(int n) {
         int a[] = new int[n];
         for (int i=0; i<n; i++) a[i] = i;
+        return a;
+    }
+
+    private static int[] mkRandom(int n) {
+        Random random = new Random(42L);
+        int a[] = mkOrdered(n);
         for (int i=0; i<n-2; i++) {
             int j = i + 1 + random.nextInt(n-2-i);
             Array.swap(a, i, j);
         }
         return a;
-    }
-
-    static BSTree<Integer> mkTree(int ...items) {
-        BSTree<Integer> tree = new BSTree<>();
-        for (int i : items) tree.insert(i);
-        return tree;
     }
 }

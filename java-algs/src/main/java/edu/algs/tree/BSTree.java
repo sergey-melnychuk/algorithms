@@ -42,7 +42,7 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
         } else {
             int hb = b + 2 + h;
             int hllb = b + 2 + hll;
-            return (hll > 0 && Math.abs(hllb) < Math.abs(hb)) ? HL : L;
+            return (hll > 0 && Math.abs(hllb) < Math.abs(hb)) ? HL : H;
         }
     }
 
