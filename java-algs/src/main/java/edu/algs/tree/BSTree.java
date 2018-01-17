@@ -21,14 +21,29 @@ public class BSTree<T extends Comparable<T>> extends BinTree<T> {
     }
 
     Function<Node<T>, Node<T>> detect(Node<T> at) {
-        int ds = at.ds();
-        if (Math.abs(ds) > 1) {
-            return (ds < 0) ? H : L;
+        int b = at.balance();
+        //if (Math.abs(ds) > 1) return (ds < 0) ? H : L;
+
+        int l = (at.lo == null) ? 0 : at.lo.size;
+        int h = (at.hi == null) ? 0 : at.hi.size;
+
+        int lh = (at.lo == null) ? 0 : ((at.lo.hi == null) ? 0 : at.lo.hi.size);
+        int hl = (at.hi == null) ? 0 : ((at.hi.lo == null) ? 0 : at.hi.lo.size);
+
+        return decide(b, l, h, lh, hl);
+    }
+
+    Function<Node<T>, Node<T>> decide(int b, int l, int h, int lhh, int hll) {
+        if (Math.abs(b) <= 1) return IDENTITY;
+        if (b > 0) {
+            int lb = b - 2 - l;
+            int lhhb = b - 2 - lhh;
+            return (lhh > 0 && Math.abs(lhhb) < Math.abs(lb)) ? LH : L;
+        } else {
+            int hb = b + 2 + h;
+            int hllb = b + 2 + hll;
+            return (hll > 0 && Math.abs(hllb) < Math.abs(hb)) ? HL : L;
         }
-
-        // TODO implement detection of HL/LH moves as well
-
-        return IDENTITY;
     }
 
     /*                  to=C

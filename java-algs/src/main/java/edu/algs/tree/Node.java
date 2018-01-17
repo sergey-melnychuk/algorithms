@@ -22,7 +22,7 @@ class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
         dep = 1 + Math.max(((lo == null) ? 0 : lo.dep), ((hi == null) ? 0 : hi.dep));
     }
 
-    int ds() { return ((lo == null) ? 0 : lo.size) - ((hi == null) ? 0 : hi.size); }
+    int balance() { return ((lo == null) ? 0 : lo.size) - ((hi == null) ? 0 : hi.size); }
 
     @Override
     public int compareTo(Node<T> that) { return this.val.compareTo(that.val); }
