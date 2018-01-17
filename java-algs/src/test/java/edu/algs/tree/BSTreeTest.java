@@ -172,16 +172,16 @@ class BSTreeTest {
     void ordered20() { ordered(20, 8); }
 
     @Test
-    void random5() { random(5, 4); }
+    void random5() { random(5, 1); }
 
     @Test
-    void random10() { random(10, 13); }
+    void random10() { random(10, 5); }
 
     @Test
-    void random15() { random(15, 19); }
+    void random15() { random(15, 10); }
 
     @Test
-    void random20() { random(20, 36); }
+    void random20() { random(20, 13); }
 
     private void ordered(int d, int relaxation) { ordered(d, relaxation, false); }
 
@@ -198,7 +198,7 @@ class BSTreeTest {
 
     private void random(int d, int relaxation, boolean debug) {
         int n = (1 << d) - 1;
-        BinTree<Integer> tree = BinTree.empty();
+        BSTree<Integer> tree = new BSTree<>();
         int a[] = mkRandom(n);
         for (int i=0; i<n; i++) {
             tree.insert(a[i]);
