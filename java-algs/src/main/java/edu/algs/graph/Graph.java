@@ -16,7 +16,7 @@ public class Graph {
     private final int N;
     private final List<List<Edge>> edges;
 
-    Graph(final int nrOfNodes) {
+    public Graph(final int nrOfNodes) {
         if (nrOfNodes <= 0) {
             throw new IllegalStateException("Number of nodes must be positive");
         }
@@ -123,10 +123,10 @@ public class Graph {
     }
 
     public static class Size {
-        final int nodes;
-        final int edges;
+        public final int nodes;
+        public final int edges;
 
-        public Size(int nodes, int edges) {
+        Size(int nodes, int edges) {
             this.nodes = nodes;
             this.edges = edges;
         }

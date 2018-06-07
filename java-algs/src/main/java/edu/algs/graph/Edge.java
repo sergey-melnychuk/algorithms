@@ -3,12 +3,12 @@ package edu.algs.graph;
 import java.util.Comparator;
 import java.util.Objects;
 
-class Edge {
+public class Edge {
     static final int W = 1; // default weight of the edge (used in un-weighted graph)
 
-    final int source;
-    final int target;
-    final int weight;
+    public final int source;
+    public final int target;
+    public final int weight;
 
     public Edge(int source, int target, int weight) {
         this.source = source;
